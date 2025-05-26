@@ -17,4 +17,6 @@ confluent-kafka==2.3.0
 langgraph>=0.0.15
 langchain>=0.1.0
 langchain-openai>=0.0.5
-langchain-community>=0.0.10 
+langchain-community>=0.0.10
+psycopg2-binary==2.9.9
+alembic==1.13.1 
