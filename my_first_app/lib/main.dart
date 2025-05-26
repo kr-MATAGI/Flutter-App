@@ -1,12 +1,24 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'home_view/home_btn.dart';
 import 'home_view/home_ctl.dart';
+import 'chat_view/ai_chat_ctl.dart';
 
-void main() {
+Future<void> main() async {
+  // Flutter 바인딩 초기화
+  WidgetsFlutterBinding.ensureInitialized();
+  
+  // .env 파일 로드
+  await dotenv.load(fileName: ".env");
+  
+  // 앱 실행
   runApp(
-    ChangeNotifierProvider(
-      create: (context) => HomeController(),
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider(create: (context) => HomeController()),
+        ChangeNotifierProvider(create: (context) => AIChatController()..initialize()),
+      ],
       child: const MyApp(),
     ),
   );
@@ -110,9 +122,6 @@ class MyHomePage extends StatelessWidget {
             Consumer<HomeController>(
               builder: (context, controller, child) => HomeButton(
                 onStyleButtonPressed: controller.onStyleButtonPressed,
-                onGradientButtonPressed: controller.onGradientButtonPressed,
-                onOutlinedButtonPressed: controller.onOutlinedButtonPressed,
-                onResetButtonPressed: controller.onResetButtonPressed,
               ),
             ),
           ],

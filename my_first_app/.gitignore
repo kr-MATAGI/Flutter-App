@@ -1,3 +1,5 @@
+.env
+
 # Flutter/Dart specific
 .dart_tool/
 .flutter-plugins
