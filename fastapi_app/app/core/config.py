@@ -19,12 +19,19 @@ class Settings(BaseSettings):
 
     # OpenAI 설정
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
-    AI_MODEL_NAME: str = os.getenv("AI_MODEL_NAME", "gpt-4o")
+    AI_MODEL_NAME: str = os.getenv("AI_MODEL_NAME", "gpt-4")
 
     # JWT 토큰 설정
     SECRET_KEY: str = os.getenv("SECRET_KEY", "your-secret-key-here")
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+
+    # Kafka 설정
+    KAFKA_BOOTSTRAP_SERVERS: List[str] = os.getenv(
+        "KAFKA_BOOTSTRAP_SERVERS", "localhost:9092"
+    ).split(",")
+    KAFKA_CONSUMER_GROUP: str = "chat_consumer_group"
+    KAFKA_CHAT_TOPIC: str = "chat_messages"
 
     class Config:
         case_sensitive = True

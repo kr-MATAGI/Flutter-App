@@ -4,7 +4,8 @@ from dotenv import load_dotenv
 import os
 
 from app.core.config import settings
-from app.routers import chat, auth
+from app.routers import auth
+from fastapi_app.app.routers import kafka_chat
 
 # 환경 변수 로드
 load_dotenv()
@@ -25,7 +26,7 @@ app.add_middleware(
 )
 
 # 라우터 등록
-app.include_router(chat.router, prefix="/api/v1/chat", tags=["chat"])
+app.include_router(kafka_chat.router, prefix="/api/v1/chat", tags=["chat"])
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
 
 
