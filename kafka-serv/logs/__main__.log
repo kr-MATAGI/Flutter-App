@@ -205,3 +205,79 @@
 2025-05-27 14:27:06 - __main__ - INFO - --------------------------------------------------
 2025-05-27 14:27:07 - __main__ - INFO - [End] Producer : 5.30807900428772
 2025-05-27 14:33:46 - __main__ - INFO - [Start] Consumer
+2025-05-27 14:46:27 - __main__ - INFO - BROKER_HOST: None, BROKER_PORT: 9092
+2025-05-27 14:46:40 - __main__ - INFO - BROKER_HOST: localhost, BROKER_PORT: 9092
+2025-05-27 14:46:40 - __main__ - INFO - [Start] AI Chat Consumer - HOST: localhost, PORT: 9092
+2025-05-27 14:46:40 - __main__ - INFO - Waiting for messages...
+2025-05-27 14:48:35 - __main__ - INFO - BROKER_HOST: localhost, BROKER_PORT: 9092
+2025-05-27 14:48:38 - __main__ - INFO - Consumer started. Listening to topic: ai_chat
+2025-05-27 14:48:38 - __main__ - INFO - Received message: Hello, Kafka! Message 0 from partition 0 at offset 0
+2025-05-27 14:48:39 - __main__ - INFO - Received message: Hello, Kafka! Message 1 from partition 0 at offset 1
+2025-05-27 14:48:40 - __main__ - INFO - Received message: Hello, Kafka! Message 2 from partition 0 at offset 2
+2025-05-27 14:48:41 - __main__ - INFO - Received message: Hello, Kafka! Message 3 from partition 0 at offset 3
+2025-05-27 14:48:42 - __main__ - INFO - Received message: Hello, Kafka! Message 4 from partition 0 at offset 4
+2025-05-27 14:48:43 - __main__ - INFO - Received message: Hello, Kafka! Message 0 from partition 0 at offset 5
+2025-05-27 14:48:44 - __main__ - INFO - Received message: Hello, Kafka! Message 1 from partition 0 at offset 6
+2025-05-27 14:48:45 - __main__ - INFO - Received message: Hello, Kafka! Message 2 from partition 0 at offset 7
+2025-05-27 14:48:46 - __main__ - INFO - Received message: Hello, Kafka! Message 3 from partition 0 at offset 8
+2025-05-27 14:48:47 - __main__ - INFO - Received message: Hello, Kafka! Message 4 from partition 0 at offset 9
+2025-05-27 14:48:58 - __main__ - INFO - [Start] Producer
+2025-05-27 14:48:58 - __main__ - INFO - Message sent successfully: Hello, Kafka! Message 0
+2025-05-27 14:48:58 - __main__ - INFO - Topic: test_chat
+2025-05-27 14:48:58 - __main__ - INFO - Partition: 0
+2025-05-27 14:48:58 - __main__ - INFO - Offset: 5
+2025-05-27 14:48:58 - __main__ - INFO - --------------------------------------------------
+2025-05-27 14:48:59 - __main__ - INFO - Message sent successfully: Hello, Kafka! Message 1
+2025-05-27 14:48:59 - __main__ - INFO - Topic: test_chat
+2025-05-27 14:48:59 - __main__ - INFO - Partition: 0
+2025-05-27 14:48:59 - __main__ - INFO - Offset: 6
+2025-05-27 14:48:59 - __main__ - INFO - --------------------------------------------------
+2025-05-27 14:49:00 - __main__ - INFO - Message sent successfully: Hello, Kafka! Message 2
+2025-05-27 14:49:00 - __main__ - INFO - Topic: test_chat
+2025-05-27 14:49:00 - __main__ - INFO - Partition: 0
+2025-05-27 14:49:00 - __main__ - INFO - Offset: 7
+2025-05-27 14:49:00 - __main__ - INFO - --------------------------------------------------
+2025-05-27 14:49:01 - __main__ - INFO - Message sent successfully: Hello, Kafka! Message 3
+2025-05-27 14:49:01 - __main__ - INFO - Topic: test_chat
+2025-05-27 14:49:01 - __main__ - INFO - Partition: 0
+2025-05-27 14:49:01 - __main__ - INFO - Offset: 8
+2025-05-27 14:49:01 - __main__ - INFO - --------------------------------------------------
+2025-05-27 14:49:02 - __main__ - INFO - Message sent successfully: Hello, Kafka! Message 4
+2025-05-27 14:49:02 - __main__ - INFO - Topic: test_chat
+2025-05-27 14:49:02 - __main__ - INFO - Partition: 0
+2025-05-27 14:49:02 - __main__ - INFO - Offset: 9
+2025-05-27 14:49:02 - __main__ - INFO - --------------------------------------------------
+2025-05-27 14:49:03 - __main__ - INFO - [End] Producer : 5.170799016952515
+2025-05-27 14:49:23 - __main__ - INFO - [Start] Producer
+2025-05-27 14:49:23 - __main__ - INFO - Message sent successfully: Hello, Kafka! Message 0
+2025-05-27 14:49:23 - __main__ - INFO - Topic: ai_chat
+2025-05-27 14:49:23 - __main__ - INFO - Partition: 0
+2025-05-27 14:49:23 - __main__ - INFO - Offset: 10
+2025-05-27 14:49:23 - __main__ - INFO - --------------------------------------------------
+2025-05-27 14:49:23 - __main__ - INFO - Received message: Hello, Kafka! Message 0 from partition 0 at offset 10
+2025-05-27 14:49:24 - __main__ - INFO - Message sent successfully: Hello, Kafka! Message 1
+2025-05-27 14:49:24 - __main__ - INFO - Topic: ai_chat
+2025-05-27 14:49:24 - __main__ - INFO - Partition: 0
+2025-05-27 14:49:24 - __main__ - INFO - Offset: 11
+2025-05-27 14:49:24 - __main__ - INFO - --------------------------------------------------
+2025-05-27 14:49:24 - __main__ - INFO - Received message: Hello, Kafka! Message 1 from partition 0 at offset 11
+2025-05-27 14:49:25 - __main__ - INFO - Message sent successfully: Hello, Kafka! Message 2
+2025-05-27 14:49:25 - __main__ - INFO - Received message: Hello, Kafka! Message 2 from partition 0 at offset 12
+2025-05-27 14:49:25 - __main__ - INFO - Topic: ai_chat
+2025-05-27 14:49:25 - __main__ - INFO - Partition: 0
+2025-05-27 14:49:25 - __main__ - INFO - Offset: 12
+2025-05-27 14:49:25 - __main__ - INFO - --------------------------------------------------
+2025-05-27 14:49:26 - __main__ - INFO - Message sent successfully: Hello, Kafka! Message 3
+2025-05-27 14:49:26 - __main__ - INFO - Topic: ai_chat
+2025-05-27 14:49:26 - __main__ - INFO - Partition: 0
+2025-05-27 14:49:26 - __main__ - INFO - Offset: 13
+2025-05-27 14:49:26 - __main__ - INFO - --------------------------------------------------
+2025-05-27 14:49:26 - __main__ - INFO - Received message: Hello, Kafka! Message 3 from partition 0 at offset 13
+2025-05-27 14:49:27 - __main__ - INFO - Message sent successfully: Hello, Kafka! Message 4
+2025-05-27 14:49:27 - __main__ - INFO - Topic: ai_chat
+2025-05-27 14:49:27 - __main__ - INFO - Partition: 0
+2025-05-27 14:49:27 - __main__ - INFO - Offset: 14
+2025-05-27 14:49:27 - __main__ - INFO - --------------------------------------------------
+2025-05-27 14:49:27 - __main__ - INFO - Received message: Hello, Kafka! Message 4 from partition 0 at offset 14
+2025-05-27 14:49:28 - __main__ - INFO - [End] Producer : 5.169133901596069
+2025-05-27 14:49:30 - __main__ - INFO - Consumer stopped

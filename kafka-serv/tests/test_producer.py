@@ -25,7 +25,7 @@ def main():
         # Send Messages
         for i in range(5):  # 테스트를 위해 메시지 수를 줄임
             message = f"Hello, Kafka! Message {i}"
-            future = producer.send("test_chat", value=message)
+            future = producer.send("ai_chat", value=message)
             # 메시지 전송 완료 대기
             record_metadata = future.get(timeout=10)
             logger.info(f"Message sent successfully: {message}")

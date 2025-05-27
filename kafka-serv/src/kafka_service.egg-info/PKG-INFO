@@ -2,4 +2,5 @@ Metadata-Version: 2.4
 Name: kafka_service
 Version: 0.1
 Requires-Dist: kafka-python
+Requires-Dist: aiokafka
 Dynamic: requires-dist

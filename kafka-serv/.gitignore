@@ -31,6 +31,7 @@ kafka-serv/venv.bak/
 venv/
 
 # IDE
+.env
 kafka-serv/.idea/
 kafka-serv/.vscode/
 kafka-serv/**/*.swp
@@ -61,3 +62,8 @@ kafka-serv/.coverage
 kafka-serv/.coverage.*
 kafka-serv/coverage.xml
 kafka-serv/**/*.cover 
+
+# Logs
+src/logs/
+logs/
+*.log
