@@ -1,0 +1,11 @@
+setup.py
+src/kafka_service/__init__.py
+src/kafka_service/consumer.py
+src/kafka_service.egg-info/PKG-INFO
+src/kafka_service.egg-info/SOURCES.txt
+src/kafka_service.egg-info/dependency_links.txt
+src/kafka_service.egg-info/requires.txt
+src/kafka_service.egg-info/top_level.txt
+src/kafka_service/utils/__init__.py
+src/kafka_service/utils/logger.py
+tests/test_producer.py

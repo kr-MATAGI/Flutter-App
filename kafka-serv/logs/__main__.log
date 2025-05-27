@@ -1,0 +1,206 @@
+2025-05-27 13:52:56 - __main__ - INFO - [Start] Consumer
+2025-05-27 13:53:03 - __main__ - INFO - [Start] Consumer
+2025-05-27 13:53:31 - __main__ - INFO - [Start] Consumer
+2025-05-27 14:01:12 - __main__ - INFO - [Start] Producer
+2025-05-27 14:01:12 - __main__ - INFO - [End] Producer : 0.24819493293762207
+2025-05-27 14:01:44 - __main__ - INFO - [Start] Consumer
+2025-05-27 14:01:44 - __main__ - INFO - [End] Consumer
+2025-05-27 14:01:57 - __main__ - INFO - [Start] Consumer
+2025-05-27 14:01:58 - __main__ - INFO - [End] Consumer
+2025-05-27 14:02:50 - __main__ - INFO - [Start] Consumer
+2025-05-27 14:02:51 - __main__ - INFO - [End] Consumer
+2025-05-27 14:05:50 - __main__ - INFO - [Start] Producer
+2025-05-27 14:05:50 - __main__ - INFO - [End] Producer : 0.26160097122192383
+2025-05-27 14:05:56 - __main__ - INFO - [Start] Producer
+2025-05-27 14:05:57 - __main__ - INFO - [End] Producer : 0.25220513343811035
+2025-05-27 14:06:15 - __main__ - INFO - [Start] Consumer
+2025-05-27 14:06:16 - __main__ - INFO - [End] Consumer
+2025-05-27 14:07:04 - __main__ - INFO - [Start] Producer
+2025-05-27 14:07:04 - __main__ - INFO - [End] Producer : 0.2471768856048584
+2025-05-27 14:07:11 - __main__ - INFO - [Start] Consumer
+2025-05-27 14:07:12 - __main__ - INFO - [End] Consumer
+2025-05-27 14:08:45 - __main__ - INFO - [Start] Consumer
+2025-05-27 14:08:48 - __main__ - INFO - [Start] Producer
+2025-05-27 14:08:49 - __main__ - INFO - [End] Producer : 0.2652168273925781
+2025-05-27 14:09:52 - __main__ - INFO - Consumer stopped by user
+2025-05-27 14:10:15 - __main__ - INFO - [Start] Producer
+2025-05-27 14:10:15 - __main__ - INFO - [End] Producer : 0.25196003913879395
+2025-05-27 14:10:45 - __main__ - INFO - [Start] Consumer
+2025-05-27 14:11:51 - __main__ - INFO - Consumer stopped by user
+2025-05-27 14:12:08 - __main__ - INFO - [Start] Consumer
+2025-05-27 14:12:08 - __main__ - INFO - Partitions for topic 'ai_chat': {0}
+2025-05-27 14:12:08 - __main__ - INFO - Waiting for messages...
+2025-05-27 14:12:13 - __main__ - INFO - [Start] Producer
+2025-05-27 14:12:13 - __main__ - INFO - Message sent successfully: Hello, Kafka! Message 0
+2025-05-27 14:12:13 - __main__ - INFO - Topic: ai_chat
+2025-05-27 14:12:13 - __main__ - INFO - Partition: 0
+2025-05-27 14:12:13 - __main__ - INFO - Offset: 0
+2025-05-27 14:12:13 - __main__ - INFO - --------------------------------------------------
+2025-05-27 14:12:13 - __main__ - INFO - --------------------------------------------------
+2025-05-27 14:12:13 - __main__ - INFO - New message received:
+2025-05-27 14:12:13 - __main__ - INFO - Topic: ai_chat
+2025-05-27 14:12:13 - __main__ - INFO - Partition: 0
+2025-05-27 14:12:13 - __main__ - INFO - Offset: 0
+2025-05-27 14:12:13 - __main__ - INFO - Key: None
+2025-05-27 14:12:13 - __main__ - INFO - Value: Hello, Kafka! Message 0
+2025-05-27 14:12:13 - __main__ - INFO - --------------------------------------------------
+2025-05-27 14:12:14 - __main__ - INFO - Message sent successfully: Hello, Kafka! Message 1
+2025-05-27 14:12:14 - __main__ - INFO - Topic: ai_chat
+2025-05-27 14:12:14 - __main__ - INFO - Partition: 0
+2025-05-27 14:12:14 - __main__ - INFO - Offset: 1
+2025-05-27 14:12:14 - __main__ - INFO - --------------------------------------------------
+2025-05-27 14:12:14 - __main__ - INFO - --------------------------------------------------
+2025-05-27 14:12:14 - __main__ - INFO - New message received:
+2025-05-27 14:12:14 - __main__ - INFO - Topic: ai_chat
+2025-05-27 14:12:14 - __main__ - INFO - Partition: 0
+2025-05-27 14:12:14 - __main__ - INFO - Offset: 1
+2025-05-27 14:12:14 - __main__ - INFO - Key: None
+2025-05-27 14:12:14 - __main__ - INFO - Value: Hello, Kafka! Message 1
+2025-05-27 14:12:14 - __main__ - INFO - --------------------------------------------------
+2025-05-27 14:12:15 - __main__ - INFO - --------------------------------------------------
+2025-05-27 14:12:15 - __main__ - INFO - New message received:
+2025-05-27 14:12:15 - __main__ - INFO - Topic: ai_chat
+2025-05-27 14:12:15 - __main__ - INFO - Partition: 0
+2025-05-27 14:12:15 - __main__ - INFO - Offset: 2
+2025-05-27 14:12:15 - __main__ - INFO - Key: None
+2025-05-27 14:12:15 - __main__ - INFO - Message sent successfully: Hello, Kafka! Message 2
+2025-05-27 14:12:15 - __main__ - INFO - Value: Hello, Kafka! Message 2
+2025-05-27 14:12:15 - __main__ - INFO - --------------------------------------------------
+2025-05-27 14:12:15 - __main__ - INFO - Topic: ai_chat
+2025-05-27 14:12:15 - __main__ - INFO - Partition: 0
+2025-05-27 14:12:15 - __main__ - INFO - Offset: 2
+2025-05-27 14:12:15 - __main__ - INFO - --------------------------------------------------
+2025-05-27 14:12:16 - __main__ - INFO - Message sent successfully: Hello, Kafka! Message 3
+2025-05-27 14:12:16 - __main__ - INFO - Topic: ai_chat
+2025-05-27 14:12:16 - __main__ - INFO - Partition: 0
+2025-05-27 14:12:16 - __main__ - INFO - Offset: 3
+2025-05-27 14:12:16 - __main__ - INFO - --------------------------------------------------
+2025-05-27 14:12:16 - __main__ - INFO - --------------------------------------------------
+2025-05-27 14:12:16 - __main__ - INFO - New message received:
+2025-05-27 14:12:16 - __main__ - INFO - Topic: ai_chat
+2025-05-27 14:12:16 - __main__ - INFO - Partition: 0
+2025-05-27 14:12:16 - __main__ - INFO - Offset: 3
+2025-05-27 14:12:16 - __main__ - INFO - Key: None
+2025-05-27 14:12:16 - __main__ - INFO - Value: Hello, Kafka! Message 3
+2025-05-27 14:12:16 - __main__ - INFO - --------------------------------------------------
+2025-05-27 14:12:17 - __main__ - INFO - Message sent successfully: Hello, Kafka! Message 4
+2025-05-27 14:12:17 - __main__ - INFO - Topic: ai_chat
+2025-05-27 14:12:17 - __main__ - INFO - Partition: 0
+2025-05-27 14:12:17 - __main__ - INFO - --------------------------------------------------
+2025-05-27 14:12:17 - __main__ - INFO - Offset: 4
+2025-05-27 14:12:17 - __main__ - INFO - --------------------------------------------------
+2025-05-27 14:12:17 - __main__ - INFO - New message received:
+2025-05-27 14:12:17 - __main__ - INFO - Topic: ai_chat
+2025-05-27 14:12:17 - __main__ - INFO - Partition: 0
+2025-05-27 14:12:17 - __main__ - INFO - Offset: 4
+2025-05-27 14:12:17 - __main__ - INFO - Key: None
+2025-05-27 14:12:17 - __main__ - INFO - Value: Hello, Kafka! Message 4
+2025-05-27 14:12:17 - __main__ - INFO - --------------------------------------------------
+2025-05-27 14:12:18 - __main__ - INFO - [End] Producer : 5.196008920669556
+2025-05-27 14:12:35 - __main__ - INFO - [Start] Producer
+2025-05-27 14:12:35 - __main__ - INFO - Message sent successfully: Hello, Kafka! Message 0
+2025-05-27 14:12:35 - __main__ - INFO - Topic: ai_chat
+2025-05-27 14:12:35 - __main__ - INFO - Partition: 0
+2025-05-27 14:12:35 - __main__ - INFO - Offset: 5
+2025-05-27 14:12:35 - __main__ - INFO - --------------------------------------------------
+2025-05-27 14:12:35 - __main__ - INFO - --------------------------------------------------
+2025-05-27 14:12:35 - __main__ - INFO - New message received:
+2025-05-27 14:12:35 - __main__ - INFO - Topic: ai_chat
+2025-05-27 14:12:35 - __main__ - INFO - Partition: 0
+2025-05-27 14:12:35 - __main__ - INFO - Offset: 5
+2025-05-27 14:12:35 - __main__ - INFO - Key: None
+2025-05-27 14:12:35 - __main__ - INFO - Value: Hello, Kafka! Message 0
+2025-05-27 14:12:35 - __main__ - INFO - --------------------------------------------------
+2025-05-27 14:12:36 - __main__ - INFO - Message sent successfully: Hello, Kafka! Message 1
+2025-05-27 14:12:36 - __main__ - INFO - Topic: ai_chat
+2025-05-27 14:12:36 - __main__ - INFO - Partition: 0
+2025-05-27 14:12:36 - __main__ - INFO - Offset: 6
+2025-05-27 14:12:36 - __main__ - INFO - --------------------------------------------------
+2025-05-27 14:12:36 - __main__ - INFO - --------------------------------------------------
+2025-05-27 14:12:36 - __main__ - INFO - New message received:
+2025-05-27 14:12:36 - __main__ - INFO - Topic: ai_chat
+2025-05-27 14:12:36 - __main__ - INFO - Partition: 0
+2025-05-27 14:12:36 - __main__ - INFO - Offset: 6
+2025-05-27 14:12:36 - __main__ - INFO - Key: None
+2025-05-27 14:12:36 - __main__ - INFO - Value: Hello, Kafka! Message 1
+2025-05-27 14:12:36 - __main__ - INFO - --------------------------------------------------
+2025-05-27 14:12:37 - __main__ - INFO - Message sent successfully: Hello, Kafka! Message 2
+2025-05-27 14:12:37 - __main__ - INFO - Topic: ai_chat
+2025-05-27 14:12:37 - __main__ - INFO - --------------------------------------------------
+2025-05-27 14:12:37 - __main__ - INFO - Partition: 0
+2025-05-27 14:12:37 - __main__ - INFO - New message received:
+2025-05-27 14:12:37 - __main__ - INFO - Offset: 7
+2025-05-27 14:12:37 - __main__ - INFO - Topic: ai_chat
+2025-05-27 14:12:37 - __main__ - INFO - --------------------------------------------------
+2025-05-27 14:12:37 - __main__ - INFO - Partition: 0
+2025-05-27 14:12:37 - __main__ - INFO - Offset: 7
+2025-05-27 14:12:37 - __main__ - INFO - Key: None
+2025-05-27 14:12:37 - __main__ - INFO - Value: Hello, Kafka! Message 2
+2025-05-27 14:12:37 - __main__ - INFO - --------------------------------------------------
+2025-05-27 14:12:38 - __main__ - INFO - Message sent successfully: Hello, Kafka! Message 3
+2025-05-27 14:12:38 - __main__ - INFO - Topic: ai_chat
+2025-05-27 14:12:38 - __main__ - INFO - --------------------------------------------------
+2025-05-27 14:12:38 - __main__ - INFO - Partition: 0
+2025-05-27 14:12:38 - __main__ - INFO - Offset: 8
+2025-05-27 14:12:38 - __main__ - INFO - New message received:
+2025-05-27 14:12:38 - __main__ - INFO - --------------------------------------------------
+2025-05-27 14:12:38 - __main__ - INFO - Topic: ai_chat
+2025-05-27 14:12:38 - __main__ - INFO - Partition: 0
+2025-05-27 14:12:38 - __main__ - INFO - Offset: 8
+2025-05-27 14:12:38 - __main__ - INFO - Key: None
+2025-05-27 14:12:38 - __main__ - INFO - Value: Hello, Kafka! Message 3
+2025-05-27 14:12:38 - __main__ - INFO - --------------------------------------------------
+2025-05-27 14:12:39 - __main__ - INFO - Message sent successfully: Hello, Kafka! Message 4
+2025-05-27 14:12:39 - __main__ - INFO - Topic: ai_chat
+2025-05-27 14:12:39 - __main__ - INFO - Partition: 0
+2025-05-27 14:12:39 - __main__ - INFO - Offset: 9
+2025-05-27 14:12:39 - __main__ - INFO - --------------------------------------------------
+2025-05-27 14:12:39 - __main__ - INFO - --------------------------------------------------
+2025-05-27 14:12:39 - __main__ - INFO - New message received:
+2025-05-27 14:12:39 - __main__ - INFO - Topic: ai_chat
+2025-05-27 14:12:39 - __main__ - INFO - Partition: 0
+2025-05-27 14:12:39 - __main__ - INFO - Offset: 9
+2025-05-27 14:12:39 - __main__ - INFO - Key: None
+2025-05-27 14:12:39 - __main__ - INFO - Value: Hello, Kafka! Message 4
+2025-05-27 14:12:39 - __main__ - INFO - --------------------------------------------------
+2025-05-27 14:12:40 - __main__ - INFO - [End] Producer : 5.181917905807495
+2025-05-27 14:17:58 - __main__ - INFO - Consumer stopped by user
+2025-05-27 14:25:33 - __main__ - INFO - [Start] Consumer
+2025-05-27 14:26:59 - __main__ - INFO - [Start] Consumer
+2025-05-27 14:27:02 - __main__ - INFO - [Start] Producer
+2025-05-27 14:27:02 - __main__ - INFO - Message sent successfully: Hello, Kafka! Message 0
+2025-05-27 14:27:02 - __main__ - INFO - Topic: test_chat
+2025-05-27 14:27:02 - __main__ - INFO - Partition: 0
+2025-05-27 14:27:02 - __main__ - INFO - Offset: 0
+2025-05-27 14:27:02 - __main__ - INFO - --------------------------------------------------
+2025-05-27 14:27:03 - __main__ - INFO - Message: ConsumerRecord(topic='ai_chat', partition=0, leader_epoch=0, offset=0, timestamp=1748322733449, timestamp_type=0, key=None, value='Hello, Kafka! Message 0', headers=[], checksum=None, serialized_key_size=-1, serialized_value_size=23, serialized_header_size=-1)
+2025-05-27 14:27:03 - __main__ - INFO - Message: ConsumerRecord(topic='ai_chat', partition=0, leader_epoch=0, offset=1, timestamp=1748322734464, timestamp_type=0, key=None, value='Hello, Kafka! Message 1', headers=[], checksum=None, serialized_key_size=-1, serialized_value_size=23, serialized_header_size=-1)
+2025-05-27 14:27:03 - __main__ - INFO - Message: ConsumerRecord(topic='ai_chat', partition=0, leader_epoch=0, offset=2, timestamp=1748322735479, timestamp_type=0, key=None, value='Hello, Kafka! Message 2', headers=[], checksum=None, serialized_key_size=-1, serialized_value_size=23, serialized_header_size=-1)
+2025-05-27 14:27:03 - __main__ - INFO - Message: ConsumerRecord(topic='ai_chat', partition=0, leader_epoch=0, offset=3, timestamp=1748322736504, timestamp_type=0, key=None, value='Hello, Kafka! Message 3', headers=[], checksum=None, serialized_key_size=-1, serialized_value_size=23, serialized_header_size=-1)
+2025-05-27 14:27:03 - __main__ - INFO - Message: ConsumerRecord(topic='ai_chat', partition=0, leader_epoch=0, offset=4, timestamp=1748322737518, timestamp_type=0, key=None, value='Hello, Kafka! Message 4', headers=[], checksum=None, serialized_key_size=-1, serialized_value_size=23, serialized_header_size=-1)
+2025-05-27 14:27:03 - __main__ - INFO - Message: ConsumerRecord(topic='ai_chat', partition=0, leader_epoch=0, offset=5, timestamp=1748322755228, timestamp_type=0, key=None, value='Hello, Kafka! Message 0', headers=[], checksum=None, serialized_key_size=-1, serialized_value_size=23, serialized_header_size=-1)
+2025-05-27 14:27:03 - __main__ - INFO - Message: ConsumerRecord(topic='ai_chat', partition=0, leader_epoch=0, offset=6, timestamp=1748322756235, timestamp_type=0, key=None, value='Hello, Kafka! Message 1', headers=[], checksum=None, serialized_key_size=-1, serialized_value_size=23, serialized_header_size=-1)
+2025-05-27 14:27:03 - __main__ - INFO - Message: ConsumerRecord(topic='ai_chat', partition=0, leader_epoch=0, offset=7, timestamp=1748322757242, timestamp_type=0, key=None, value='Hello, Kafka! Message 2', headers=[], checksum=None, serialized_key_size=-1, serialized_value_size=23, serialized_header_size=-1)
+2025-05-27 14:27:03 - __main__ - INFO - Message: ConsumerRecord(topic='ai_chat', partition=0, leader_epoch=0, offset=8, timestamp=1748322758260, timestamp_type=0, key=None, value='Hello, Kafka! Message 3', headers=[], checksum=None, serialized_key_size=-1, serialized_value_size=23, serialized_header_size=-1)
+2025-05-27 14:27:03 - __main__ - INFO - Message: ConsumerRecord(topic='ai_chat', partition=0, leader_epoch=0, offset=9, timestamp=1748322759282, timestamp_type=0, key=None, value='Hello, Kafka! Message 4', headers=[], checksum=None, serialized_key_size=-1, serialized_value_size=23, serialized_header_size=-1)
+2025-05-27 14:27:03 - __main__ - INFO - Message sent successfully: Hello, Kafka! Message 1
+2025-05-27 14:27:03 - __main__ - INFO - Topic: test_chat
+2025-05-27 14:27:03 - __main__ - INFO - Partition: 0
+2025-05-27 14:27:03 - __main__ - INFO - Offset: 1
+2025-05-27 14:27:03 - __main__ - INFO - --------------------------------------------------
+2025-05-27 14:27:04 - __main__ - INFO - Message sent successfully: Hello, Kafka! Message 2
+2025-05-27 14:27:04 - __main__ - INFO - Topic: test_chat
+2025-05-27 14:27:04 - __main__ - INFO - Partition: 0
+2025-05-27 14:27:04 - __main__ - INFO - Offset: 2
+2025-05-27 14:27:04 - __main__ - INFO - --------------------------------------------------
+2025-05-27 14:27:05 - __main__ - INFO - Message sent successfully: Hello, Kafka! Message 3
+2025-05-27 14:27:05 - __main__ - INFO - Topic: test_chat
+2025-05-27 14:27:05 - __main__ - INFO - Partition: 0
+2025-05-27 14:27:05 - __main__ - INFO - Offset: 3
+2025-05-27 14:27:05 - __main__ - INFO - --------------------------------------------------
+2025-05-27 14:27:06 - __main__ - INFO - Message sent successfully: Hello, Kafka! Message 4
+2025-05-27 14:27:06 - __main__ - INFO - Topic: test_chat
+2025-05-27 14:27:06 - __main__ - INFO - Partition: 0
+2025-05-27 14:27:06 - __main__ - INFO - Offset: 4
+2025-05-27 14:27:06 - __main__ - INFO - --------------------------------------------------
+2025-05-27 14:27:07 - __main__ - INFO - [End] Producer : 5.30807900428772
