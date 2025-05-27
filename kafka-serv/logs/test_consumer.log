@@ -1,2 +1,4 @@
 2025-05-27 14:26:59 - test_consumer - INFO - Consumer initialized for topic: test_chat, group_id: test_group
 2025-05-27 14:26:59 - test_consumer - WARNING - No partitions found for topic test_chat
+2025-05-27 14:33:46 - test_consumer - INFO - Consumer initialized for topic: test_chat, group_id: test_group
+2025-05-27 14:33:46 - test_consumer - INFO - Partitions for topic test_chat: {0}
