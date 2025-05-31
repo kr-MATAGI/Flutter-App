@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import '../controllers/ai_chat_controller.dart';
+import '../controllers/ai_chat_ctl.dart';
 
 class AIChatView extends StatelessWidget {
   const AIChatView({super.key});
