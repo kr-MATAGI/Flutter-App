@@ -1,6 +1,7 @@
+import os
+
 from pydantic_settings import BaseSettings
 from typing import List
-import os
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -18,7 +19,7 @@ class Settings(BaseSettings):
     ]
 
     # OpenAI 설정
-    OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "")
+    OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "Plz Check .env file")
     AI_MODEL_NAME: str = os.getenv("AI_MODEL_NAME", "gpt-4")
 
     # JWT 토큰 설정
@@ -27,11 +28,9 @@ class Settings(BaseSettings):
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
 
     # Kafka 설정
-    KAFKA_BOOTSTRAP_SERVERS: List[str] = os.getenv(
-        "KAFKA_BOOTSTRAP_SERVERS", "localhost:9092"
-    ).split(",")
-    KAFKA_CONSUMER_GROUP: str = "chat_consumer_group"
-    KAFKA_CHAT_TOPIC: str = "chat_messages"
+    KAFKA_HOST: str = os.getenv("KAFKA_HOST", "localhost")
+    KAFKA_PORT: str = os.getenv("KAFKA_PORT", "9092")
+    KAFKA_URL: str = f"{KAFKA_HOST}:{KAFKA_PORT}"
 
     # Database 설정
     POSTGRES_USER: str = os.getenv("POSTGRES_USER", "postgres")

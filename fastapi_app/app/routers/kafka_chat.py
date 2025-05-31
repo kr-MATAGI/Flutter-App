@@ -1,9 +1,10 @@
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends, HTTPException
-from typing import List, Dict
-from datetime import datetime
 import json
 import asyncio
-from app.core.config import settings
+from typing import List, Dict
+from datetime import datetime
+
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends, HTTPException
+
 from app.core.kafka_config import KafkaConfig, ChatMessage, send_message
 
 router = APIRouter()
@@ -50,7 +51,7 @@ async def kafka_message_consumer():
 
 
 # WebSocket 엔드포인트
-@router.websocket("/ws/{room_id}/{user_id}")
+@router.websocket("/ws/chat/{room_id}/{user_id}")
 async def websocket_endpoint(websocket: WebSocket, room_id: str, user_id: str):
     producer = await KafkaConfig.get_producer()
     try:
@@ -81,25 +82,3 @@ async def websocket_endpoint(websocket: WebSocket, room_id: str, user_id: str):
     finally:
         if "consumer_task" in locals():
             consumer_task.cancel()
-
-
-# REST API 엔드포인트 (기존 코드는 유지)
-@router.post("/send")
-async def send_message_rest(message: str):
-    """
-    채팅 메시지를 전송하고 AI의 응답을 받습니다.
-    """
-    try:
-        # TODO: OpenAI API 연동 구현
-        return {"response": f"메시지 '{message}'에 대한 AI 응답입니다."}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
-
-
-@router.get("/history")
-async def get_chat_history():
-    """
-    채팅 기록을 조회합니다.
-    """
-    # TODO: 데이터베이스 연동 구현
-    return {"history": []}
