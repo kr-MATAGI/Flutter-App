@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import '../common/logger.dart';
-import 'chat_model.dart';
 import 'ai_chat_ctl.dart';
+import 'chat_model.dart';
+import 'loading_widget.dart';
 
 // Chat Controller
 final AIChatController aiChatController = AIChatController();
@@ -107,9 +108,20 @@ class ChatMessageBubble extends StatelessWidget {
             color: message.role == 'user' ? Colors.blue[100] : Colors.grey[200],
             borderRadius: BorderRadius.circular(12.0),
           ),
-          child: Text(
-            message.content,
-            style: const TextStyle(fontSize: 16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (message.content.isNotEmpty)
+                Text(
+                  message.content,
+                  style: const TextStyle(fontSize: 16.0),
+                ),
+              if (message.role == 'assistant' && message.content.isEmpty) ...[
+                const SizedBox(height: 4.0),
+                const LoadingDots(),
+              ],
+            ],
           ),
         ),
       );

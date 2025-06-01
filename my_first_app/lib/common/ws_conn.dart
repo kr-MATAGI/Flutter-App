@@ -75,12 +75,23 @@ class WebSocketConnector {
       // 메시지 수신 리스너 설정
       _channel!.stream.listen(
         (message) {
-          // 수신된 메시지를 문자열로 변환하여 스트림에 추가
+          // 수신된 메시지를 JSON으로 파싱
           final decodedMessage = utf8.decode(message.toString().codeUnits);
-          _messageController.add(decodedMessage);
-          AppLogger.info('메시지 수신: $decodedMessage');
+          final jsonData = jsonDecode(decodedMessage) as Map<String, dynamic>;
+
+          // content 필드가 Map인 경우 message 추출
+          String displayMessage = '';
+          if (jsonData['content'] is Map) {
+            displayMessage = (jsonData['content']
+                as Map<String, dynamic>)['message'] as String;
+          } else {
+            displayMessage = jsonData['content'].toString();
+          }
+
+          _messageController.add(displayMessage);
+          AppLogger.info('메시지 수신 및 파싱: $displayMessage');
         },
-        onError: (error) {
+        onError: (Object error) {
           AppLogger.error('WebSocket 에러 발생: ${error.toString()}');
           disconnect();
         },

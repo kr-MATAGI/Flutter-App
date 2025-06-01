@@ -19,7 +19,11 @@ class AIChatController extends ChangeNotifier {
   factory AIChatController() => _instance;
 
   // 내부 생성자
-  AIChatController._internal();
+  AIChatController._internal() {
+    _wsConnector.messageStream.listen((message) {
+      listenAiResponse(message);
+    });
+  }
 
   // WebSocket 객체
   final WebSocketConnector _wsConnector = WebSocketConnector();
@@ -29,16 +33,30 @@ class AIChatController extends ChangeNotifier {
 
   // 사용자 메시지 추가 메서드
   void addMessage(String message) {
-    ChatModel chatModel = ChatModel(role: 'user', content: message);
-    messages.add(chatModel);
-    _wsConnector.sendMessage(chatModel.toJson().toString());
-    AppLogger.info('채팅 메시지 추가: $chatModel');
+    // 사용자 메시지 추가
+    ChatModel userMessage = ChatModel(role: 'user', content: message);
+    messages.add(userMessage);
+
+    // 빈 AI 응답 메시지 추가 (로딩 표시용)
+    messages.add(ChatModel(role: 'assistant', content: ''));
+
+    // 메시지 전송
+    _wsConnector.sendMessage(userMessage.toJson().toString());
+    AppLogger.info('채팅 메시지 추가: $userMessage');
 
     notifyListeners();
   }
 
   // AI 메시지 추가 메서드
   void listenAiResponse(String message) {
+    // 마지막 메시지가 빈 assistant 메시지인 경우 제거
+    if (messages.isNotEmpty &&
+        messages.last.role == 'assistant' &&
+        messages.last.content.isEmpty) {
+      messages.removeLast();
+    }
+
+    // AI 응답 메시지 추가
     messages.add(ChatModel(role: 'assistant', content: message));
     AppLogger.info('AI 메시지 추가: $message');
 
@@ -50,4 +68,5 @@ class AIChatController extends ChangeNotifier {
     messages.clear();
 
     notifyListeners();
+  }
 }
