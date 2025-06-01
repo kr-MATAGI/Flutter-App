@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 import os
 
 from app.core.config import settings
-from app.routers import auth, kafka_chat, single_chat, status
+from app.routers import auth, single_chat, status, ws_chat
 
 # 환경 변수 로드
 load_dotenv()
@@ -22,14 +22,14 @@ app = FastAPI(
 # CORS 미들웨어 설정
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=os.getenv("BACKEND_CORS_ORIGINS", ["*"]),
+    allow_origins=["*"],  # 개발 환경에서만 사용
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 # 라우터 등록
-app.include_router(kafka_chat.router, prefix="/api/v1/chat", tags=["chat"])
+app.include_router(ws_chat.router, prefix="/api/v1/chat", tags=["chat"])
 app.include_router(auth.router, prefix="/api/v1/auth", tags=["auth"])
 app.include_router(
     single_chat.router, prefix="/api/v1/single-chat", tags=["single-chat"]

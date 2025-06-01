@@ -1,13 +1,40 @@
 import json
 import asyncio
-
-from typing import List
-from pydantic import BaseModel
+from datetime import datetime
+from typing import List, Optional
+from pydantic import BaseModel, Field
 from aiokafka import AIOKafkaProducer, AIOKafkaConsumer
 
 from app.core.config import settings
 from app.models import KafkaMessage
 from app.utils.logger import setup_logger
+
+
+class ChatMessage(BaseModel):
+    """채팅 메시지 모델"""
+
+    content: str = Field(..., description="메시지 내용")
+    sender_id: str = Field(..., description="발신자 ID")
+    receiver_id: str = Field(..., description="수신자 ID")
+    timestamp: datetime = Field(
+        default_factory=datetime.utcnow, description="메시지 전송 시간"
+    )
+    message_type: str = Field(
+        default="text", description="메시지 타입 (text, ai, human 등)"
+    )
+    chat_room_id: Optional[str] = Field(None, description="채팅방 ID")
+
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "content": "안녕하세요!",
+                "sender_id": "user_123",
+                "receiver_id": "user_456",
+                "timestamp": "2024-02-28T12:00:00Z",
+                "message_type": "text",
+                "chat_room_id": "room_789",
+            }
+        }
 
 
 class KafkaConfig:
@@ -61,3 +88,8 @@ class KafkaConfig:
             await self._producer.send_and_wait(self.chat_topic, message.dict())
         except Exception as e:
             self.logger.error(f"Error sending message to Kafka: {e}")
+
+
+async def send_message(kafka_config: KafkaConfig, message: KafkaMessage):
+    """메시지를 Kafka로 전송하는 유틸리티 함수"""
+    await kafka_config.send_message(message)
