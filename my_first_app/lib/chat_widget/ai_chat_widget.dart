@@ -1,6 +1,11 @@
 import 'package:flutter/material.dart';
 import '../common/logger.dart';
 
+import 'ai_chat_ctl.dart';
+
+// Chat Controller
+final AIChatController aiChatController = AIChatController();
+
 /// AI 채팅 하단 시트 위젯
 class AiChatBottomSheet extends StatelessWidget {
   // 생성자
@@ -79,12 +84,27 @@ class AiChatBottomSheet extends StatelessWidget {
 }
 
 // 사용자 채팅 입력 위젯
-class UserChatInputField extends StatelessWidget {
-  // 생성자
+class UserChatInputField extends StatefulWidget {
   const UserChatInputField({super.key});
 
   @override
+  State<UserChatInputField> createState() => _UserChatInputFieldState();
+}
+
+class _UserChatInputFieldState extends State<UserChatInputField> {
+  String currentText = '';
+  final TextEditingController _textController = TextEditingController();
+
+  @override
+  void dispose() {
+    _textController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) => TextField(
+        controller: _textController,
+        onChanged: (text) => currentText = text,
         decoration: InputDecoration(
           hintText: '메시지를 입력하세요',
           filled: true,
@@ -92,8 +112,10 @@ class UserChatInputField extends StatelessWidget {
           suffixIcon: IconButton(
             icon: const Icon(Icons.send),
             onPressed: () {
-              // TODO: 메시지 전송 처리
-              AppLogger.info('메시지 전송 버튼이 클릭되었습니다');
+              // 사용자 메시지 전달
+              aiChatController.addMessage(currentText);
+              _textController.clear(); // 입력 필드 초기화
+              currentText = '';
             },
           ),
           border: OutlineInputBorder(
