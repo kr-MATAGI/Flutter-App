@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../common/logger.dart';
-
+import 'chat_model.dart';
 import 'ai_chat_ctl.dart';
 
 // Chat Controller
@@ -65,10 +65,15 @@ class AiChatBottomSheet extends StatelessWidget {
             ),
             // 채팅 내용이 표시될 영역
             Expanded(
-              child: Container(
-                padding: const EdgeInsets.all(16.0),
-                child: const Center(
-                  child: Text('채팅 내용이 여기에 표시됩니다'),
+              child: AnimatedBuilder(
+                animation: aiChatController,
+                builder: (context, child) => ListView.builder(
+                  padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                  itemCount: aiChatController.messages.length,
+                  itemBuilder: (context, index) {
+                    final message = aiChatController.messages[index];
+                    return ChatMessageBubble(message: message);
+                  },
                 ),
               ),
             ),
@@ -84,6 +89,32 @@ class AiChatBottomSheet extends StatelessWidget {
       ),
     );
   }
+}
+
+/// 채팅 메시지 버블 위젯
+class ChatMessageBubble extends StatelessWidget {
+  final ChatModel message;
+
+  const ChatMessageBubble({super.key, required this.message});
+
+  @override
+  Widget build(BuildContext context) => Align(
+        alignment: message.role == 'user'
+            ? Alignment.centerRight
+            : Alignment.centerLeft,
+        child: Container(
+          margin: const EdgeInsets.symmetric(vertical: 4.0),
+          padding: const EdgeInsets.symmetric(horizontal: 12.0, vertical: 8.0),
+          decoration: BoxDecoration(
+            color: message.role == 'user' ? Colors.blue[100] : Colors.grey[200],
+            borderRadius: BorderRadius.circular(12.0),
+          ),
+          child: Text(
+            message.content,
+            style: const TextStyle(fontSize: 16.0),
+          ),
+        ),
+      );
 }
 
 // 사용자 채팅 입력 위젯

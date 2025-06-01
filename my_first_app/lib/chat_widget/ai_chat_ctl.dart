@@ -42,4 +42,6 @@ class AIChatController extends ChangeNotifier {
 
     notifyListeners();
   }
+
+  // Flutter App <-> Server (WebSocket)
 }

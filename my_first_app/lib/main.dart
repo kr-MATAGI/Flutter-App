@@ -21,7 +21,7 @@ class MyApp extends StatelessWidget {
             title: const Text('홈 화면'),
             backgroundColor: Colors.blue,
           ),
-          body: Center(
+          body: const Center(
             child: AiChatButton(
               buttonText: "AI 채팅",
             ),
