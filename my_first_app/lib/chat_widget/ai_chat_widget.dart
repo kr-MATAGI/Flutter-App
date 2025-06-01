@@ -15,8 +15,11 @@ class AiChatBottomSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     // 화면 크기 정보 가져오기
     final screenHeight = MediaQuery.of(context).size.height;
+    AppLogger.info('screenHeight: $screenHeight');
+
     // 키보드 높이 가져오기
     final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+    AppLogger.info('bottomInset: $bottomInset');
 
     return Padding(
       // 키보드 높이만큼 패딩 추가
