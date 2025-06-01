@@ -1,6 +1,6 @@
 import 'dart:async';
 import 'dart:convert';
-import 'package:web_socket_channel/web_socket_channel.dart';
+
 import 'package:web_socket_channel/io.dart';
 import 'package:web_socket_channel/status.dart' as status;
 import 'package:flutter_dotenv/flutter_dotenv.dart';
@@ -108,7 +108,10 @@ class WebSocketConnector {
 
     try {
       // UTF-8 인코딩하여 메시지 전송
-      final encodedMessage = utf8.encode(message);
+      final encodedMessage = utf8.encode({
+        'role': 'user',
+        'text': message,
+      }.toString());
       _channel!.sink.add(encodedMessage);
       AppLogger.info('메시지 전송: $message');
     } catch (e) {

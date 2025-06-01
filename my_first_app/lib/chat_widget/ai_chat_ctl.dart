@@ -3,6 +3,8 @@ import 'package:flutter/material.dart';
 import '../common/logger.dart';
 import 'chat_model.dart';
 
+import '../common/ws_conn.dart';
+
 /*
  * ChangeNotifier: 상태 관리 클래스
  *  - 상태가 변경되었음을 위젯에게 알려주는 역할
@@ -19,13 +21,19 @@ class AIChatController extends ChangeNotifier {
   // 내부 생성자
   AIChatController._internal();
 
+  // WebSocket 객체
+  final WebSocketConnector _wsConnector = WebSocketConnector();
+
   // 채팅 메시지 목록
   final List<ChatModel> messages = [];
 
   // 사용자 메시지 추가 메서드
   void addMessage(String message) {
-    messages.add(ChatModel(role: 'user', content: message));
-    AppLogger.info('채팅 메시지 추가: $message');
+    ChatModel chatModel = ChatModel(role: 'user', content: message);
+    messages.add(chatModel);
+    _wsConnector.sendMessage(chatModel.toJson().toString());
+    AppLogger.info('채팅 메시지 추가: $chatModel');
+
     notifyListeners();
   }
 
@@ -33,6 +41,7 @@ class AIChatController extends ChangeNotifier {
   void listenAiResponse(String message) {
     messages.add(ChatModel(role: 'assistant', content: message));
     AppLogger.info('AI 메시지 추가: $message');
+
     notifyListeners();
   }
 
@@ -41,7 +50,4 @@ class AIChatController extends ChangeNotifier {
     messages.clear();
 
     notifyListeners();
-  }
-
-  // Flutter App <-> Server (WebSocket)
 }
