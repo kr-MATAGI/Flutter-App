@@ -7,6 +7,7 @@ import os
 
 from app.core.config import settings
 from app.routers import auth, single_chat, status, ws_chat
+from app.routers.controller.ai_resp_ctl import AiRespController
 
 # 환경 변수 로드
 load_dotenv()
@@ -37,6 +38,11 @@ app.include_router(
 app.include_router(status.router, prefix="/api/v1/status", tags=["status"])
 
 
+# AI Model
+AiRespController(model_name=os.getenv("FREE_AI_MODEL", "llama"))
+AiRespController(model_name=os.getenv("AI_MODEL", "chatgpt"))
+
+
 # 커스텀 OpenAPI 스키마
 def custom_openapi():
     if app.openapi_schema:
@@ -44,8 +50,8 @@ def custom_openapi():
 
     openapi_schema = get_openapi(
         title=os.getenv("PROJECT_NAME", "AI Chat API"),
-        version="1.0.0",
-        description="AI 채팅을 위한 FastAPI 기반 백엔드 API",
+        version=os.getenv("VERSION", "1.0.0"),
+        description=os.getenv("DESCRIPTION", "AI 채팅을 위한 FastAPI 기반 백엔드 API"),
         routes=app.routes,
     )
 

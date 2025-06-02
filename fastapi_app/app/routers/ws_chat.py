@@ -1,3 +1,4 @@
+import os
 import json
 import asyncio
 from typing import List, Dict
@@ -7,6 +8,7 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends, HTTPExce
 
 from app.core.kafka_config import KafkaConfig, ChatMessage, send_message
 from app.utils.logger import setup_logger
+from app.routers.controller.ai_resp_ctl import AiRespController
 
 router = APIRouter()
 logger = setup_logger("ws_chat")
@@ -14,6 +16,11 @@ logger = setup_logger("ws_chat")
 # Kafka 설정
 CHAT_TOPIC = "chat_messages"
 KAFKA_GROUP_ID = "chat_group"
+
+# AI Model
+free_ai_model = AiRespController.get_instance(
+    model_name=os.getenv("FREE_AI_MODEL", "llama")
+)
 
 
 # 활성 연결을 관리하는 클래스
@@ -136,9 +143,15 @@ async def websocket_test_endpoint(websocket: WebSocket):
                     except json.JSONDecodeError:
                         content = message
 
+                    # LLM Response 생성
+                    llm_resp = await free_ai_model.ainvoke(content)
+
                     # 응답 생성
                     response = {
-                        "content": f"에코: {content}",
+                        "role": "assistant",
+                        "content": {
+                            "message": llm_resp,
+                        },
                         "timestamp": datetime.now().isoformat(),
                         "type": "echo",
                     }

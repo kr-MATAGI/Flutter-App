@@ -21,6 +21,7 @@ class Settings(BaseSettings):
     # OpenAI 설정
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "Plz Check .env file")
     AI_MODEL_NAME: str = os.getenv("AI_MODEL_NAME", "gpt-4")
+    FREE_AI_MODEL_NAME: str = os.getenv("FREE_AI_MODEL_NAME", "llama")
 
     # JWT 토큰 설정
     SECRET_KEY: str = os.getenv("SECRET_KEY", "your-secret-key-here")

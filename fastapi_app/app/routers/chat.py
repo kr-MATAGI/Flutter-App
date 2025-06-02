@@ -1,3 +1,5 @@
+import json
+import asyncio
 from fastapi import (
     APIRouter,
     WebSocket,
@@ -9,10 +11,10 @@ from fastapi import (
 )
 from typing import List, Dict, Optional
 from datetime import datetime
-import json
-import asyncio
-from app.core.kafka_config import KafkaConfig, ChatMessage, send_message
 from pydantic import BaseModel
+
+from app.core.kafka_config import KafkaConfig, ChatMessage, send_message
+from app.routers.controller.ai_resp_ctl import AiRespController
 
 router = APIRouter()
 
