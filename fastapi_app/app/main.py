@@ -6,7 +6,7 @@ from dotenv import load_dotenv
 import os
 
 from app.core.config import settings
-from app.routers import auth, single_chat, status, ws_chat
+from app.routers import auth, single_chat, status, ws_chat, user_info
 
 from app.routers.controller.ai_resp_ctl import AiRespController
 from app.routers.controller.db_ctl import DBController
@@ -39,6 +39,7 @@ app.include_router(
     single_chat.router, prefix="/api/v1/single-chat", tags=["single-chat"]
 )
 app.include_router(status.router, prefix="/api/v1/status", tags=["status"])
+app.include_router(user_info.router, prefix="/api/v1/user-info", tags=["user-info"])
 
 
 ### Controller 초기화
