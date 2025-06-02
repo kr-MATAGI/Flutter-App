@@ -3,6 +3,7 @@ from enum import Enum
 from typing import Optional, Dict
 
 from app.utils.logger import setup_logger
+from app.routers.controller.persona.supervisor_prompt import get_supervisor_prompt
 
 # from langchain_core import PydanticOutputParser, PromptTemplate
 from langchain_community.llms import Ollama
