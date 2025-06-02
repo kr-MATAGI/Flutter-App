@@ -4,8 +4,10 @@ from fastapi import (
 )
 
 from app.core.config import settings
+from app.routers.controller.res_ctl import ResController
 
 router = APIRouter()
+res_controller = ResController()
 
 
 @router.get("/ping")
@@ -20,3 +22,13 @@ async def get_status():
         "api_key": settings.OPENAI_API_KEY,
         "model_name": settings.AI_MODEL_NAME,
     }
+
+
+@router.get("/res-mem")
+async def get_res_monitor():
+    return await res_controller.get_memory_usage()
+
+
+@router.get("/res-threshold")
+async def get_res_threshold():
+    return await res_controller.get_memory_alert()

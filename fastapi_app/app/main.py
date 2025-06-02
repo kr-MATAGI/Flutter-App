@@ -7,7 +7,10 @@ import os
 
 from app.core.config import settings
 from app.routers import auth, single_chat, status, ws_chat
+
 from app.routers.controller.ai_resp_ctl import AiRespController
+from app.routers.controller.db_ctl import DBController
+from app.routers.controller.res_ctl import ResController
 
 # 환경 변수 로드
 load_dotenv()
@@ -38,9 +41,16 @@ app.include_router(
 app.include_router(status.router, prefix="/api/v1/status", tags=["status"])
 
 
+### Controller 초기화
 # AI Model
 AiRespController(model_name=os.getenv("FREE_AI_MODEL", "llama"))
 AiRespController(model_name=os.getenv("AI_MODEL", "chatgpt"))
+
+# DB
+DBController()
+
+# Resource
+ResController()
 
 
 # 커스텀 OpenAPI 스키마

@@ -43,6 +43,10 @@ class Settings(BaseSettings):
         f"postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}:{POSTGRES_PORT}/{POSTGRES_DB}"
     )
 
+    # Resource
+    SYSTEM_MEM_THRESHOLD: int = os.getenv("SYSTEM_MEM_THRESHOLD", 80)
+    PROCESS_MEM_THRESHOLD: int = os.getenv("PROCESS_MEM_THRESHOLD", 50)
+
     class Config:
         case_sensitive = True
 
