@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.core.database import get_db
 from app.models.chat_base import ChatRequest, ChatResponse, DB_ChatLog
-from app.routers.controller.ai_resp_ctl import AiRespController
+from app.routers.controller.llm_ctl import LLM_Controller
 
 router = APIRouter()
 
@@ -16,7 +16,7 @@ async def send_single_chat(request: ChatRequest, db: Session = Depends(get_db)):
     """
     try:
         # OpenAI - ChatGPT 연결
-        llm = AiRespController.get_instance(model_name=settings.FREE_AI_MODEL_NAME)
+        llm = LLM_Controller.get_instance(model_name=settings.FREE_AI_MODEL_NAME)
 
         # 채팅 메시지 전송
         llm_response = await llm.ainvoke(request.message)

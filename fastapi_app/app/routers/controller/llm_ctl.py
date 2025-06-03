@@ -26,15 +26,15 @@ class LLMType(Enum):
 
 
 ### AI Response Controller (by LangGraph)
-class AiRespController:
-    _instance: Optional["AiRespController"] = None
-    _instances: Dict[str, "AiRespController"] = {}
+class LLM_Controller:
+    _instance: Optional["LLM_Controller"] = None
+    _instances: Dict[str, "LLM_Controller"] = {}
     _initialized: bool = False
 
-    def __new__(cls, model_name: str = "llama") -> "AiRespController":
+    def __new__(cls, model_name: str = "llama") -> "LLM_Controller":
         # 모델별로 다른 인스턴스를 생성
         if model_name not in cls._instances:
-            cls._instances[model_name] = super(AiRespController, cls).__new__(cls)
+            cls._instances[model_name] = super(LLM_Controller, cls).__new__(cls)
         return cls._instances[model_name]
 
     def __init__(self, model_name: str = "llama"):
@@ -64,7 +64,7 @@ class AiRespController:
             self._initialized = True
 
     @classmethod
-    def get_instance(cls, model_name: str = "llama") -> "AiRespController":
+    def get_instance(cls, model_name: str = "llama") -> "LLM_Controller":
         """
         지정된 모델의 AiRespController 인스턴스를 반환합니다.
         이미 존재하는 경우 기존 인스턴스를 반환하고, 없는 경우 새로 생성합니다.
@@ -78,7 +78,7 @@ class AiRespController:
         return cls(model_name)
 
     @classmethod
-    def get_all_instances(cls) -> Dict[str, "AiRespController"]:
+    def get_all_instances(cls) -> Dict[str, "LLM_Controller"]:
         """
         현재 생성된 모든 AI 컨트롤러 인스턴스를 반환합니다.
 

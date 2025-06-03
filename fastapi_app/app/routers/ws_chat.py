@@ -8,7 +8,7 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends, HTTPExce
 
 from app.core.kafka_config import KafkaConfig, ChatMessage, send_message
 from app.utils.logger import setup_logger
-from app.routers.controller.ai_resp_ctl import AiRespController
+from app.routers.controller.llm_ctl import LLM_Controller
 
 router = APIRouter()
 logger = setup_logger("ws_chat")
@@ -18,7 +18,7 @@ CHAT_TOPIC = "chat_messages"
 KAFKA_GROUP_ID = "chat_group"
 
 # AI Model
-free_ai_model = AiRespController.get_instance(
+free_ai_model = LLM_Controller.get_instance(
     model_name=os.getenv("FREE_AI_MODEL", "llama")
 )
 
