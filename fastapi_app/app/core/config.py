@@ -18,6 +18,12 @@ class Settings(BaseSettings):
         "http://localhost",  # 기본 로컬호스트
     ]
 
+    PROJECT_NAME: str = os.getenv("PROJECT_NAME", "AI Chat API")
+    VERSION: str = os.getenv("VERSION", "1.0.0")
+    DESCRIPTION: str = os.getenv(
+        "DESCRIPTION", "AI 채팅을 위한 FastAPI 기반 백엔드 API"
+    )
+
     # OpenAI 설정
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "Plz Check .env file")
     AI_MODEL_NAME: str = os.getenv("AI_MODEL_NAME", "gpt-4")
@@ -46,6 +52,13 @@ class Settings(BaseSettings):
     # Resource
     SYSTEM_MEM_THRESHOLD: int = os.getenv("SYSTEM_MEM_THRESHOLD", 80)
     PROCESS_MEM_THRESHOLD: int = os.getenv("PROCESS_MEM_THRESHOLD", 50)
+
+    # AI Model
+    AI_MODEL: str = os.getenv("AI_MODEL", "chatgpt")
+    FREE_AI_MODEL: str = os.getenv("FREE_AI_MODEL", "llama")
+    OCR_AI_MODEL: str = os.getenv("OCR_AI_MODEL", "")
+
+    OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "Plz Check .env file")
 
     class Config:
         case_sensitive = True

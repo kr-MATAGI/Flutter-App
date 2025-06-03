@@ -6,14 +6,12 @@ from dotenv import load_dotenv
 import os
 
 from app.core.config import settings
-from app.routers import auth, single_chat, status, ws_chat, user_info
+from app.routers import auth, single_chat, status, ws_chat, user_info, image_scan
 
-from app.routers.controller.ai_resp_ctl import AiRespController
+from app.routers.controller.llm_ctl import LLM_Controller
 from app.routers.controller.db_ctl import DBController
 from app.routers.controller.res_ctl import ResController
-
-# 환경 변수 로드
-load_dotenv()
+from app.routers.controller.ocr_ctl import OCR_Controller
 
 app = FastAPI(
     title=os.getenv("PROJECT_NAME", "AI Chat API"),
@@ -40,12 +38,14 @@ app.include_router(
 )
 app.include_router(status.router, prefix="/api/v1/status", tags=["status"])
 app.include_router(user_info.router, prefix="/api/v1/user-info", tags=["user-info"])
+app.include_router(image_scan.router, prefix="/api/v1/image-scan", tags=["image-scan"])
 
 
 ### Controller 초기화
 # AI Model
-AiRespController(model_name=os.getenv("FREE_AI_MODEL", "llama"))
-AiRespController(model_name=os.getenv("AI_MODEL", "chatgpt"))
+LLM_Controller(model_name=settings.FREE_AI_MODEL)
+# LLM_Controller(model_name=settings.AI_MODEL)
+OCR_Controller(model_name=settings.OCR_AI_MODEL)
 
 # DB
 DBController()
@@ -60,9 +60,9 @@ def custom_openapi():
         return app.openapi_schema
 
     openapi_schema = get_openapi(
-        title=os.getenv("PROJECT_NAME", "AI Chat API"),
-        version=os.getenv("VERSION", "1.0.0"),
-        description=os.getenv("DESCRIPTION", "AI 채팅을 위한 FastAPI 기반 백엔드 API"),
+        title=settings.PROJECT_NAME,
+        version=settings.VERSION,
+        description=settings.DESCRIPTION,
         routes=app.routes,
     )
 
