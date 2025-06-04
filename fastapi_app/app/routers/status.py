@@ -42,6 +42,7 @@ async def get_agent_graph():
     # @TODO: 그래프 FastAPI로 보여줄 수 있는지 확인
     buf = io.BytesIO()
     graph_image = await LLM_Controller.show_graph()
+    graph_image.save(buf, format="PNG")
     buf.seek(0)
 
     return StreamingResponse(buf, media_type="image/png")
