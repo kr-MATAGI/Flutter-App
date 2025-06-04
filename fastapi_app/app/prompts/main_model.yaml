@@ -1,5 +1,5 @@
-db_query:
-  description: SQL query generation prompt
+main_model:
+  description: Main Model Prompt
   content: |
     You are an expert SQL assistant. Generate a valid SQL query based on the user's input.
     Ensure the query is safe and assumes a table named 'menu_info' with the following columns:

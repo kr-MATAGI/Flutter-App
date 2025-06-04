@@ -1,5 +1,7 @@
 import os
 import io
+import networkx as nx
+import matplotlib.pyplot as plt
 from enum import Enum
 from typing import Optional, Dict, Any
 from PIL import Image
@@ -7,7 +9,12 @@ from PIL import Image
 from app.utils.logger import setup_logger
 from app.core.config import settings
 from app.routers.controller.persona.supervisor_prompt import get_supervisor_prompt
-from app.models.graph_state import BasicState, GraphNode
+from app.models.graph_state import (
+    BasicState,
+    GraphNode,
+    DB_AgentResponse,
+    MainAgentResponse,
+)
 from app.prompts.prompt_loader import load_prompt
 
 from langchain_openai import ChatOpenAI
@@ -38,6 +45,7 @@ class AgentController:
 
     # AI Model
     GRAPH_NODE_MAPPING = {}
+    MODEL_PROMPTS = {}
 
     _base_model: Ollama = None
     _base_model_name: str = ""
@@ -81,9 +89,7 @@ class AgentController:
                 logger.error(f"Error initializing base model: {e}")
                 raise e
 
-            logger.info(
-                f"Initialized Base Model: {self._base_model_name} ({self._base_model})"
-            )
+            logger.info(f"Initialized Base Model: {self._base_model_name}")
 
             # Paid Model
             try:
@@ -103,14 +109,17 @@ class AgentController:
                 logger.error(f"Error initializing paid model: {e}")
                 raise e
 
-            logger.info(
-                f"Initialized Paid Model: {self._paid_model_name} ({self._paid_model})"
-            )
+            logger.info(f"Initialized Paid Model: {self._paid_model_name}")
 
             self.GRAPH_NODE_MAPPING = {
                 GraphNode.MAIN_MODEL: self._main_model_node,
                 GraphNode.DB_QUERY_NODE: self._db_search_node,
                 GraphNode.EVAL_NODE: self._eval_node,
+            }
+
+            self.MODEL_PROMPTS = {
+                GraphNode.MAIN_MODEL: load_prompt("main_model"),
+                GraphNode.DB_QUERY_NODE: load_prompt("db_query"),
             }
 
             self._initialized = True
@@ -121,6 +130,9 @@ class AgentController:
             "paid_model": self._paid_model_name,
         }
 
+    def __str__(self) -> str:
+        return f"AgentController(base_model={self._base_model_name}, paid_model={self._paid_model_name})"
+
     async def ainvoke(self, message: str, use_paid_model: bool = False):
         if not use_paid_model:
             return await self._base_model.ainvoke(message)
@@ -128,18 +140,47 @@ class AgentController:
             return await self._paid_model.ainvoke(message)
 
     async def call_agent(self, message: str, use_paid_model: bool = False):
-        pass
-
-    def __str__(self) -> str:
-        return f"AgentController(base_model={self._base_model_name}, paid_model={self._paid_model_name})"
+        result = await self._graph.abatch([BasicState(message=message)])
+        return result[0]
 
     async def show_graph(self):
         logger.info(f"Showing graph for model")
 
-        graph_image = Image.open(
-            io.BytesIO(self._graph.draw_mermaid_png(draw_method=MermaidDrawMethod.API))
+        # 그래프 생성
+        G = nx.DiGraph()
+
+        # 노드 추가
+        nodes = [START, END] + [node.value for node in self.GRAPH_NODE_MAPPING.keys()]
+        G.add_nodes_from(nodes)
+
+        # 엣지 추가
+        G.add_edge(START, GraphNode.MAIN_MODEL.value)
+        G.add_edge(GraphNode.MAIN_MODEL.value, END)
+
+        # 그래프 레이아웃 설정
+        pos = nx.spring_layout(G)
+
+        # 그래프 그리기
+        plt.figure(figsize=(10, 8))
+        nx.draw(
+            G,
+            pos,
+            with_labels=True,
+            node_color="lightblue",
+            node_size=2000,
+            font_size=10,
+            font_weight="bold",
+            arrows=True,
+            edge_color="gray",
         )
-        return graph_image
+
+        # 이미지로 저장
+        buf = io.BytesIO()
+        plt.savefig(buf, format="png", bbox_inches="tight")
+        plt.close()
+        buf.seek(0)
+
+        return buf.getvalue()
 
     async def build_graph(self):
         logger.info(f"Building graph for model")
@@ -156,41 +197,66 @@ class AgentController:
         # Make graph edges
         await self.make_graph_edges()
 
+        # Compile
+        self._graph.compile()
+
     async def make_graph_node(self):
-        logger.info(f"Making graph nodes for model: {self.GRAPH_NODE_MAPPING.keys()}")
+        logger.info(
+            f"Making graph nodes for model: {[x.value for x in self.GRAPH_NODE_MAPPING.keys()]}"
+        )
 
         for node, node_func in self.GRAPH_NODE_MAPPING.items():
             self._graph.add_node(node.value, node_func)
-            logger.info(f"Added node: {node.value}, {node_func}")
+            logger.info(f"Added node: {node.value}, {str(node_func.__name__)}")
 
     async def make_graph_edges(self):
-        logger.info(f"Making graph edges for model: {self.GRAPH_NODE_MAPPING}")
+        logger.info(f"Making graph edges for model")
 
         # START
         self._graph.add_edge(START, GraphNode.MAIN_MODEL.value)
+        # self._graph.add_edge(GraphNode.DB_QUERY_NODE.value, GraphNode.MAIN_MODEL.value)
 
         # END
         self._graph.add_edge(GraphNode.MAIN_MODEL.value, END)
-
-        # Compile
-        self._graph.compile()
 
     async def _main_model_node(
         self,
         state: BasicState,
     ) -> BasicState:
-        pass
+        prompt: PromptTemplate = PromptTemplate.from_template(
+            self.MODEL_PROMPTS[GraphNode.MAIN_MODEL]
+        )
+        prompt_template = prompt.format(
+            question=state.message, format=MainAgentResponse
+        )
+        chain = (
+            prompt
+            | self._base_model
+            | PydanticOutputParser(pydantic_object=MainAgentResponse)
+        )
+        agent_response = await chain.ainvoke(prompt_template)
+        print(agent_response)
+
+        return agent_response
 
     async def _db_search_node(
         self,
         state: BasicState,
     ) -> BasicState:
-        prompt: PromptTemplate = PromptTemplate.from_template(load_prompt("db_query"))
-        chain = prompt | self._base_model
+        prompt: PromptTemplate = PromptTemplate.from_template(
+            self.MODEL_PROMPTS[GraphNode.DB_QUERY_NODE]
+        )
+        prompt_template = prompt.format(question=state.message, format=DB_AgentResponse)
+        chain = (
+            prompt
+            | self._base_model
+            | PydanticOutputParser(pydantic_object=DB_AgentResponse)
+        )
+        agent_response = await chain.ainvoke(prompt_template)
 
-        # chain_response = await chain.ainvoke(state)
+        print(agent_response)
 
-        # @TODO: 데이터베이스 조회 결과 반환
+        return agent_response
 
     async def _eval_node(
         self,

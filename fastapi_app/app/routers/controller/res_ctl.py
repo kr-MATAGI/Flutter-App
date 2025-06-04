@@ -5,7 +5,7 @@ from datetime import datetime
 from app.core.config import settings
 from app.utils.logger import setup_logger
 
-logger = setup_logger("mcp_ctl")
+logger = setup_logger("ResController")
 
 
 class ResController:
@@ -22,7 +22,7 @@ class ResController:
         if not hasattr(self, "_initialized"):
             self._initialized = True
             self.process = psutil.Process()
-            logger.info("MCP Controller initialized")
+            logger.info("Resource Controller initialized")
 
     async def get_memory_usage(self) -> Dict:
         """현재 서버의 메모리 사용량을 반환합니다."""

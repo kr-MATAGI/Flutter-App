@@ -29,7 +29,7 @@ class ChatResponse(BaseModel):
     status: str
 
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "message_id": "123e4567-e89b-12d3-a456-426614174000",
                 "user_id": "user123",
@@ -47,7 +47,9 @@ class ChatMessageRequest(BaseModel):
     room_id: str
 
     class Config:
-        schema_extra = {"example": {"message": "안녕하세요!", "room_id": "room456"}}
+        json_schema_extra = {
+            "example": {"message": "안녕하세요!", "room_id": "room456"}
+        }
 
 
 # 활성 연결을 관리하는 클래스

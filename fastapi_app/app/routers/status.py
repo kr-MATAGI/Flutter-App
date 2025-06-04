@@ -37,12 +37,14 @@ async def get_res_threshold():
     return await res_controller.get_memory_alert()
 
 
-@router.get("/show-agent-graph")
+@router.get("/graph")
 async def get_agent_graph():
-    # @TODO: 그래프 FastAPI로 보여줄 수 있는지 확인
-    buf = io.BytesIO()
-    graph_image = await AgentController.show_graph()
-    graph_image.save(buf, format="PNG")
-    buf.seek(0)
-
-    return StreamingResponse(buf, media_type="image/png")
+    """
+    에이전트 그래프의 이미지를 반환합니다.
+    """
+    try:
+        agent_controller = AgentController()
+        image_bytes = await agent_controller.show_graph()
+        return StreamingResponse(io.BytesIO(image_bytes), media_type="image/png")
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

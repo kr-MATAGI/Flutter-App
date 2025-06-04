@@ -1,3 +1,4 @@
+from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.openapi.docs import get_swagger_ui_html
@@ -21,12 +22,36 @@ from app.routers.controller.db_ctl import DBController
 from app.routers.controller.res_ctl import ResController
 from app.routers.controller.ocr_ctl import OCR_Controller
 
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    ### Controller 초기화
+    # AI Model
+    agent_controller = AgentController(
+        base_model_name=settings.FREE_AI_MODEL, paid_model_name=settings.AI_MODEL
+    )
+    ocr_controller = OCR_Controller(model_name=settings.OCR_AI_MODEL)
+
+    # DB
+    db_controller = DBController()
+
+    # Resource
+    res_controller = ResController()
+
+    # Startup
+    await agent_controller.build_graph()
+    yield
+    # Shutdown
+    pass
+
+
 app = FastAPI(
     title=os.getenv("PROJECT_NAME", "AI Chat API"),
     version="1.0.0",
     description="AI 채팅을 위한 FastAPI 기반 백엔드 API",
     docs_url=None,  # 기본 /docs 비활성화
     redoc_url=None,  # 기본 /redoc 비활성화
+    lifespan=lifespan,
 )
 
 # CORS 미들웨어 설정
@@ -48,19 +73,6 @@ app.include_router(status.router, prefix="/api/v1/status", tags=["status"])
 app.include_router(user_info.router, prefix="/api/v1/user-info", tags=["user-info"])
 app.include_router(image_scan.router, prefix="/api/v1/image-scan", tags=["image-scan"])
 app.include_router(menu_info.router, prefix="/api/v1/menu-info", tags=["menu-info"])
-
-### Controller 초기화
-# AI Model
-AgentController(
-    base_model_name=settings.FREE_AI_MODEL, paid_model_name=settings.AI_MODEL
-)
-OCR_Controller(model_name=settings.OCR_AI_MODEL)
-
-# DB
-DBController()
-
-# Resource
-ResController()
 
 
 # 커스텀 OpenAPI 스키마

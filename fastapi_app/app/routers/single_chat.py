@@ -5,6 +5,7 @@ from sqlalchemy.orm import Session
 from app.core.config import settings
 from app.core.database import get_db
 from app.models.chat_base import ChatRequest, ChatResponse, DB_ChatLog
+from app.models.graph_state import MainAgentResponse
 from app.routers.controller.agent_ctl import AgentController
 
 router = APIRouter()
@@ -51,4 +52,22 @@ async def send_single_chat(
         raise HTTPException(status_code=400, detail=f"Invalid input: {str(ve)}")
     except Exception as e:
         await db.rollback()  # 오류 발생 시 트랜잭션 롤백
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.post("/agent")
+async def get_agent_response(
+    message: str,
+):
+    agent_controller = AgentController()
+
+    try:
+        agent_resp: str = await agent_controller.call_agent(message=message)
+
+        return {
+            "status": status.HTTP_200_OK,
+            "data": agent_resp,
+        }
+
+    except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
