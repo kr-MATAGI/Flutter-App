@@ -63,6 +63,16 @@ class LLM_Controller:
             )
             self._initialized = True
 
+    async def ainvoke(self, message: str):
+        return await self.llm.ainvoke(message)
+
+    def get_model_type(self) -> LLMType:
+        """현재 설정된 모델 타입을 반환합니다."""
+        return self.model_type
+
+    def __str__(self) -> str:
+        return f"AiRespController(model_type={self.model_type}, model_name={self.model_name})"
+
     @classmethod
     def get_instance(cls, model_name: str = "llama") -> "LLM_Controller":
         """
@@ -104,12 +114,10 @@ class LLM_Controller:
 
         return response
 
-    async def ainvoke(self, message: str):
-        return await self.llm.ainvoke(message)
-
-    def get_model_type(self) -> LLMType:
-        """현재 설정된 모델 타입을 반환합니다."""
-        return self.model_type
-
-    def __str__(self) -> str:
-        return f"AiRespController(model_type={self.model_type}, model_name={self.model_name})"
+    # @classmethod
+    # async def get_menu_info(
+    #     cls,
+    # ) -> str:
+    #     target_llm = cls.get_instance(model_name)
+    #     response = await target_llm.ainvoke(message)
+    #     return response

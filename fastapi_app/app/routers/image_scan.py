@@ -35,13 +35,13 @@ def validate_image(file: UploadFile) -> bool:
 
 
 @router.post("/image-scan")
-async def image_scan(user_id: str, file: UploadFile):
+async def image_scan(user_id: str, store_name: str, file: UploadFile):
     """
     이미지 파일을 업로드받아 처리하는 엔드포인트
     """
 
     def convert_json_to_menu_info(
-        user_id: str, file_name: str, source: str
+        user_id: str, store_name: str, file_name: str, source: str
     ) -> List[MenuInfo]:
         try:
             ret_values: List[MenuInfo] = []
@@ -89,6 +89,7 @@ async def image_scan(user_id: str, file: UploadFile):
 
                 menu_info = MenuInfo(
                     user_id=user_id,
+                    store_name=store_name,
                     file_name=file_name,
                     menu_name=item["menu"],
                     cost=item["price"],
@@ -146,6 +147,7 @@ async def image_scan(user_id: str, file: UploadFile):
         # JSON 가공
         menu_info_list: List[MenuInfo] = convert_json_to_menu_info(
             user_id=user_id,
+            store_name=store_name,
             file_name=file.filename,
             source=menu_info,
         )

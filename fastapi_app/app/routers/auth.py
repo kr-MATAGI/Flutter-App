@@ -1,40 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException, status, Body
+from fastapi import APIRouter, Depends, status, Body
 from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
-from datetime import datetime, timedelta
-from typing import Optional
-from pydantic import BaseModel, EmailStr
-from app.core.config import settings
+from app.models.request_base import Token, UserCreate
 
 router = APIRouter()
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="token")
-
-
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-
-    class Config:
-        schema_extra = {
-            "example": {
-                "access_token": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...",
-                "token_type": "bearer",
-            }
-        }
-
-
-class UserCreate(BaseModel):
-    email: EmailStr
-    username: str
-    password: str
-
-    class Config:
-        schema_extra = {
-            "example": {
-                "email": "user@example.com",
-                "username": "johndoe",
-                "password": "strongpassword123",
-            }
-        }
 
 
 @router.post("/token", response_model=Token)

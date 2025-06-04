@@ -52,13 +52,14 @@ class DBController:
                     text(
                         """
                         INSERT INTO menu_info (
-                            user_id, file_name, menu_name, cost
+                            user_id, store_name, file_name, menu_name, cost
                         ) VALUES (
-                            :user_id, :file_name, :menu_name, :cost
+                            :user_id, :store_name, :file_name, :menu_name, :cost
                         )"""
                     ),
                     {
                         "user_id": menu_info.user_id,
+                        "store_name": menu_info.store_name,
                         "file_name": menu_info.file_name,
                         "menu_name": menu_info.menu_name,
                         "cost": menu_info.cost,
