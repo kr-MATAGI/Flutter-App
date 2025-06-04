@@ -17,10 +17,8 @@ logger = setup_logger("ws_chat")
 CHAT_TOPIC = "chat_messages"
 KAFKA_GROUP_ID = "chat_group"
 
-# AI Model
-free_ai_model = AgentController.get_instance(
-    model_name=os.getenv("FREE_AI_MODEL", "llama")
-)
+# Controller
+agent_controller = AgentController()
 
 
 # 활성 연결을 관리하는 클래스

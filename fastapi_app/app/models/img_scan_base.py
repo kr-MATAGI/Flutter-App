@@ -3,9 +3,10 @@ from pydantic import BaseModel, EmailStr
 
 
 class ImageScanRequest(BaseModel):
-    user_id: Optional[str] = None
-    store_name: Optional[str] = None
+    user_id: str
+    store_name: str
 
-    @classmethod
-    def as_form(cls, user_id: str, store_name: str):
-        return cls(user_id=user_id, store_name=store_name)
+    class Config:
+        json_schema_extra = {
+            "example": {"user_id": "user123", "store_name": "맛있는 식당"}
+        }

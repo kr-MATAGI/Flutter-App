@@ -51,8 +51,9 @@ app.include_router(menu_info.router, prefix="/api/v1/menu-info", tags=["menu-inf
 
 ### Controller 초기화
 # AI Model
-AgentController(model_name=settings.FREE_AI_MODEL)
-# LLM_Controller(model_name=settings.AI_MODEL)
+AgentController(
+    base_model_name=settings.FREE_AI_MODEL, paid_model_name=settings.AI_MODEL
+)
 OCR_Controller(model_name=settings.OCR_AI_MODEL)
 
 # DB

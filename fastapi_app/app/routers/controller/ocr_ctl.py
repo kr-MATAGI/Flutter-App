@@ -1,7 +1,8 @@
 import os
 import base64
-from typing import Optional
+from typing import Optional, Any
 from fastapi import UploadFile
+
 from langchain_openai import ChatOpenAI
 
 from app.core.config import settings
@@ -10,16 +11,20 @@ from app.core.config import settings
 class OCR_Controller:
     _instance: Optional["OCR_Controller"] = None
 
-    def __new__(cls) -> "OCR_Controller":
+    _model_name: str = ""
+    _model: Any = None
+
+    def __new__(cls, model_name: str = "gpt-4o") -> "OCR_Controller":
         if cls._instance is None:
             cls._instance = super(OCR_Controller, cls).__new__(cls)
+            cls._model_name = model_name
         return cls._instance
 
     def __init__(self, model_name: str = "gpt-4o"):
         if not hasattr(self, "_initialized"):
-            self.model_name = model_name
+            self._model_name = model_name
             self.llm = ChatOpenAI(
-                model=self.model_name,
+                model=self._model_name,
                 api_key=settings.OPENAI_API_KEY,
             )
             self._initialized = True
@@ -33,7 +38,7 @@ class OCR_Controller:
     async def extract_menu_info(
         self,
         image_data: str,
-        prompt: str,
+        prompt: str = "",
     ):
         # API 요청 생성
         messages = [
@@ -52,5 +57,5 @@ class OCR_Controller:
             }
         ]
 
-        response = await self.llm.ainvoke(messages)
+        response = await self._model.ainvoke(messages)
         return response.content

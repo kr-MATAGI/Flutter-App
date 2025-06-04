@@ -1,3 +1,4 @@
+from typing import Annotated
 from fastapi import APIRouter, status, HTTPException, Depends
 from sqlalchemy.orm import Session
 
@@ -10,13 +11,16 @@ router = APIRouter()
 
 
 @router.post("/chat")
-async def send_single_chat(request: ChatRequest, db: Session = Depends(get_db)):
+async def send_single_chat(
+    request: ChatRequest,
+    db: Session = Depends(get_db),
+):
     """
     단일 채팅 메시지를 전송하고 AI의 응답을 받은 후 데이터베이스에 저장합니다.
     """
     try:
         # OpenAI - ChatGPT 연결
-        llm = AgentController.get_instance(model_name=settings.FREE_AI_MODEL_NAME)
+        llm = AgentController()
 
         # 채팅 메시지 전송
         llm_response = await llm.ainvoke(request.message)
@@ -46,5 +50,5 @@ async def send_single_chat(request: ChatRequest, db: Session = Depends(get_db)):
     except ValueError as ve:
         raise HTTPException(status_code=400, detail=f"Invalid input: {str(ve)}")
     except Exception as e:
-        db.rollback()  # 오류 발생 시 트랜잭션 롤백
+        await db.rollback()  # 오류 발생 시 트랜잭션 롤백
         raise HTTPException(status_code=500, detail=str(e))

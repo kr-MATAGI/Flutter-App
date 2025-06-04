@@ -52,29 +52,35 @@ class AgentController:
     # LangGraph 그래프 초기화
     _graph: StateGraph = None
 
-    def __new__(cls) -> "AgentController":
+    def __new__(
+        cls,
+        base_model_name: str = "llama3.1",
+        paid_model_name: str = "gpt-4o",
+    ) -> "AgentController":
         if not cls._instance:
             logger.info(f"Creating new AgentController instance")
             cls._instance = super(AgentController, cls).__new__(cls)
+            cls._instance._base_model_name = base_model_name
+            cls._instance._paid_model_name = paid_model_name
+            cls._instance._initialized = False
+
         return cls._instance
 
     def __init__(
-        self,
-        base_model_name: str = "llama",
-        paid_model_name: str = "gpt-4o",
+        self, base_model_name: str = "llama3.1", paid_model_name: str = "gpt-4o"
     ):
         # 이미 초기화된 인스턴스는 다시 초기화하지 않음
-        if not hasattr(self, "_initialized") or not self._initialized:
+        if not self._initialized:
             # Base Model (Free)
-            self._base_model_name = base_model_name
             try:
-                if base_model_name == "llama":
-                    self._base_model = Ollama(model=base_model_name)
-                elif base_model_name == "gpt-4o":
-                    self._base_model = ChatOpenAI(model=base_model_name)
+                self._base_model_name = base_model_name
+                if "llama" in self._base_model_name:
+                    self._base_model = Ollama(model=self._base_model_name)
+                elif self._base_model_name == "gpt-4o":
+                    self._base_model = ChatOpenAI(model=self._base_model_name)
                 else:
                     # 예외 처리
-                    self._base_model = Ollama(model=base_model_name)
+                    self._base_model = Ollama(model=self._base_model_name)
             except Exception as e:
                 logger.error(f"Error initializing base model: {e}")
                 raise e
@@ -84,19 +90,19 @@ class AgentController:
             )
 
             # Paid Model
-            self._paid_model_name = paid_model_name
             try:
-                if paid_model_name == "gpt-4o":
-                    self._paid_model = ChatOpenAI(model=paid_model_name)
-                elif paid_model_name == "claude":
+                self._paid_model_name = paid_model_name
+                if self._paid_model_name == "gpt-4o":
+                    self._paid_model = ChatOpenAI(model=self._paid_model_name)
+                elif self._paid_model_name == "claude":
                     # @TODO: 클로드 모델 추가
                     pass
-                elif paid_model_name == "gemini":
+                elif self._paid_model_name == "gemini":
                     # @TODO: Gemini 모델 추가
                     pass
                 else:
                     # 예외 처리
-                    self._paid_model = ChatOpenAI(model=paid_model_name)
+                    self._paid_model = ChatOpenAI(model=self._paid_model_name)
             except Exception as e:
                 logger.error(f"Error initializing paid model: {e}")
                 raise e

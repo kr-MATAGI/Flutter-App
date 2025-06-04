@@ -10,6 +10,15 @@ class ChatRequest(BaseModel):
     message: str
     room_id: str
 
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "user_id": "user123",
+                "message": "안녕하세요!",
+                "room_id": "room456",
+            }
+        }
+
 
 class ChatResponse(BaseModel):
     status: str

@@ -37,7 +37,7 @@ def validate_image(file: UploadFile) -> bool:
 
 @router.post("/image-scan")
 async def image_scan(
-    request: Annotated[ImageScanRequest, Depends(ImageScanRequest.as_form)],
+    request: ImageScanRequest,
     file: UploadFile = File(...),
 ):
     """
