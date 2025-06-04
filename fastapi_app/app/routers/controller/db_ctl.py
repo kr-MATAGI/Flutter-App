@@ -69,6 +69,20 @@ class DBController:
             except Exception as e:
                 logger.error(f"메뉴 정보 삽입 중 오류 발생: {str(e)}")
 
-    async def select_menu_info(self, user_id: str):
-        """메뉴 정보를 조회합니다."""
+    async def select_menu_info(self, store_name: str):
+        """특정 가게의 메뉴 정보를 조회합니다."""
         db = get_db()
+        async for session in db:
+            try:
+                result = await session.execute(
+                    text(
+                        """
+                        SELECT menu_name, cost FROM menu_info
+                        WHERE store_name = :store_name
+                    """
+                    ),
+                    {"store_name": store_name},
+                )
+                return [dict(row) for row in result.mappings()]
+            except Exception as e:
+                logger.error(f"{store_name} 메뉴 정보 조회 중 오류 발생: {str(e)}")
