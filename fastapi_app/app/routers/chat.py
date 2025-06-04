@@ -14,7 +14,7 @@ from datetime import datetime
 from pydantic import BaseModel
 
 from app.core.kafka_config import KafkaConfig, ChatMessage, send_message
-from app.routers.controller.llm_ctl import LLM_Controller
+from app.routers.controller.agent_ctl import AgentController
 
 router = APIRouter()
 

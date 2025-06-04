@@ -7,7 +7,7 @@ from fastapi.responses import StreamingResponse
 
 from app.core.config import settings
 from app.routers.controller.res_ctl import ResController
-from app.routers.controller.llm_ctl import LLM_Controller
+from app.routers.controller.agent_ctl import AgentController
 
 router = APIRouter()
 res_controller = ResController()
@@ -41,7 +41,7 @@ async def get_res_threshold():
 async def get_agent_graph():
     # @TODO: 그래프 FastAPI로 보여줄 수 있는지 확인
     buf = io.BytesIO()
-    graph_image = await LLM_Controller.show_graph()
+    graph_image = await AgentController.show_graph()
     graph_image.save(buf, format="PNG")
     buf.seek(0)
 

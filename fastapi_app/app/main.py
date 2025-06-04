@@ -6,9 +6,17 @@ from dotenv import load_dotenv
 import os
 
 from app.core.config import settings
-from app.routers import auth, single_chat, status, ws_chat, user_info, image_scan
+from app.routers import (
+    auth,
+    single_chat,
+    status,
+    ws_chat,
+    user_info,
+    image_scan,
+    menu_info,
+)
 
-from app.routers.controller.llm_ctl import LLM_Controller
+from app.routers.controller.agent_ctl import AgentController
 from app.routers.controller.db_ctl import DBController
 from app.routers.controller.res_ctl import ResController
 from app.routers.controller.ocr_ctl import OCR_Controller
@@ -39,11 +47,11 @@ app.include_router(
 app.include_router(status.router, prefix="/api/v1/status", tags=["status"])
 app.include_router(user_info.router, prefix="/api/v1/user-info", tags=["user-info"])
 app.include_router(image_scan.router, prefix="/api/v1/image-scan", tags=["image-scan"])
-
+app.include_router(menu_info.router, prefix="/api/v1/menu-info", tags=["menu-info"])
 
 ### Controller 초기화
 # AI Model
-LLM_Controller(model_name=settings.FREE_AI_MODEL)
+AgentController(model_name=settings.FREE_AI_MODEL)
 # LLM_Controller(model_name=settings.AI_MODEL)
 OCR_Controller(model_name=settings.OCR_AI_MODEL)
 

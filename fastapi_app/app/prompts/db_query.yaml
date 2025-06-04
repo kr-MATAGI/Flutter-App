@@ -1,0 +1,14 @@
+db_query:
+  description: SQL query generation prompt
+  content: |
+    You are an expert SQL assistant. Generate a valid SQL query based on the user's input.
+    Ensure the query is safe and assumes a table named 'tbl_chat_log' with the following columns:
+    - idx (integer): A unique identifier for each record.
+    - streamer (text): The name of the live streamer.
+    - chat_user (text): The name of the user who sent the chat.
+    - chat_content (text): The content of the chat message.
+    - add_date (timestamp): The date and time when the chat was added.
+    - spon_cost (integer): The amount of money sponsored.
+
+    User Input: {question}
+    Format: {format} 

@@ -1,5 +1,6 @@
 import os
 import base64
+from typing import Optional
 from fastapi import UploadFile
 from langchain_openai import ChatOpenAI
 
@@ -7,12 +8,21 @@ from app.core.config import settings
 
 
 class OCR_Controller:
+    _instance: Optional["OCR_Controller"] = None
+
+    def __new__(cls) -> "OCR_Controller":
+        if cls._instance is None:
+            cls._instance = super(OCR_Controller, cls).__new__(cls)
+        return cls._instance
+
     def __init__(self, model_name: str = "gpt-4o"):
-        self.model_name = model_name
-        self.llm = ChatOpenAI(
-            model=self.model_name,
-            api_key=settings.OPENAI_API_KEY,
-        )
+        if not hasattr(self, "_initialized"):
+            self.model_name = model_name
+            self.llm = ChatOpenAI(
+                model=self.model_name,
+                api_key=settings.OPENAI_API_KEY,
+            )
+            self._initialized = True
 
     async def _encode_image_to_base64(self, file: UploadFile):
         contents = await file.read()

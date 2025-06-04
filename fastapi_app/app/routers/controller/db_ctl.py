@@ -86,3 +86,28 @@ class DBController:
                 return [dict(row) for row in result.mappings()]
             except Exception as e:
                 logger.error(f"{store_name} 메뉴 정보 조회 중 오류 발생: {str(e)}")
+
+    # @TODO
+    async def select_best_menu(self, store_name: str, top_k: int = 5):
+        """특정 가게에서 가장 잘 팔리는 메뉴를 조회 합니다."""
+        db = get_db()
+        async for session in db:
+            try:
+                result = await session.execute(
+                    text(
+                        """
+                        """
+                    ),
+                    {},
+                )
+            except Exception as e:
+                logger.error(
+                    f"{store_name} 가장 잘 팔리는 메뉴 조회 중 오류 발생: {str(e)}"
+                )
+
+    ### 주문 정보 관련
+    async def select_user_order_history(self, user_id: str, limit_days: int = 7):
+        """
+        사용자의 주문 내역을 조회합니다. (최대 7일)
+        """
+        pass
