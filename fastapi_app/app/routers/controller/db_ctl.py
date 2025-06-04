@@ -1,3 +1,4 @@
+from typing import Optional
 from sqlalchemy import text
 
 from app.core.database import get_db
@@ -8,8 +9,20 @@ logger = setup_logger("DB_Controller")
 
 
 class DBController:
-    def __init__(self):
-        logger.info("DBController initialized")
+    _instance: Optional["DBController"] = None
+    _db = None
+
+    def __new__(cls) -> "DBController":
+        if not cls._instance:
+            logger.info("DBController initialized")
+            cls._instance = super(DBController, cls).__new__(cls)
+            cls._instance._initialized = False
+
+        return cls._instance
+
+    def __init__(self) -> "DBController":
+        if not self._initialized:
+            self._initialized = True
 
     ### 사용자 정보 관련
     async def select_user(self, user_id: str):
