@@ -20,12 +20,6 @@ from langgraph.graph import START, END, StateGraph
 
 logger = setup_logger("AgentController")
 
-GRAPH_NODES = [
-    GraphNode.MAIN_MODEL,
-    GraphNode.DB_QUERY_NODE,
-    GraphNode.EVAL_NODE,
-]
-
 
 ### LLM 종류
 class LLMType(Enum):
@@ -43,6 +37,8 @@ class AgentController:
     _instance: Optional["AgentController"] = None
 
     # AI Model
+    GRAPH_NODE_MAPPING = {}
+
     _base_model: Ollama = None
     _base_model_name: str = ""
 
@@ -111,13 +107,13 @@ class AgentController:
                 f"Initialized Paid Model: {self._paid_model_name} ({self._paid_model})"
             )
 
-            self._initialized = True
+            self.GRAPH_NODE_MAPPING = {
+                GraphNode.MAIN_MODEL: self._main_model_node,
+                GraphNode.DB_QUERY_NODE: self._db_search_node,
+                GraphNode.EVAL_NODE: self._eval_node,
+            }
 
-    async def ainvoke(self, message: str, use_paid_model: bool = False):
-        if not use_paid_model:
-            return await self._base_model.ainvoke(message)
-        else:
-            return await self._paid_model.ainvoke(message)
+            self._initialized = True
 
     def get_model_info(self) -> str:
         return {
@@ -125,28 +121,17 @@ class AgentController:
             "paid_model": self._paid_model_name,
         }
 
+    async def ainvoke(self, message: str, use_paid_model: bool = False):
+        if not use_paid_model:
+            return await self._base_model.ainvoke(message)
+        else:
+            return await self._paid_model.ainvoke(message)
+
+    async def call_agent(self, message: str, use_paid_model: bool = False):
+        pass
+
     def __str__(self) -> str:
         return f"AgentController(base_model={self._base_model_name}, paid_model={self._paid_model_name})"
-
-    async def get_simple_response(
-        self, message: str, use_paid_model: bool = False
-    ) -> str:
-        """
-        간단한 AI 응답을 생성합니다.
-
-        Args:
-            model_name (str): 사용할 AI 모델 이름
-            message (str): 사용자 메시지
-
-        Returns:
-            str: AI의 응답 메시지
-        """
-        if not use_paid_model:
-            response = await self._base_model.ainvoke(message)
-        else:
-            response = await self._paid_model.ainvoke(message)
-
-        return response
 
     async def show_graph(self):
         logger.info(f"Showing graph for model")
@@ -172,13 +157,14 @@ class AgentController:
         await self.make_graph_edges()
 
     async def make_graph_node(self):
-        logger.info(f"Making graph nodes for model: {GRAPH_NODES}")
+        logger.info(f"Making graph nodes for model: {self.GRAPH_NODE_MAPPING.keys()}")
 
-        for node in GRAPH_NODES:
-            pass
+        for node, node_func in self.GRAPH_NODE_MAPPING.items():
+            self._graph.add_node(node.value, node_func)
+            logger.info(f"Added node: {node.value}, {node_func}")
 
     async def make_graph_edges(self):
-        logger.info(f"Making graph edges for model: {GRAPH_NODES}")
+        logger.info(f"Making graph edges for model: {self.GRAPH_NODE_MAPPING}")
 
         # START
         self._graph.add_edge(START, GraphNode.MAIN_MODEL.value)
@@ -189,7 +175,7 @@ class AgentController:
         # Compile
         self._graph.compile()
 
-    async def _manage_flow_node(
+    async def _main_model_node(
         self,
         state: BasicState,
     ) -> BasicState:
@@ -205,3 +191,9 @@ class AgentController:
         # chain_response = await chain.ainvoke(state)
 
         # @TODO: 데이터베이스 조회 결과 반환
+
+    async def _eval_node(
+        self,
+        state: BasicState,
+    ) -> BasicState:
+        pass
