@@ -1,4 +1,3 @@
-from typing import List, Dict, Any, Optional
 from pydantic import BaseModel, EmailStr
 
 
@@ -28,8 +27,3 @@ class UserCreate(BaseModel):
                 "password": "strongpassword123",
             }
         }
-
-
-class RequestBase(BaseModel):
-    user_id: Optional[str] = None
-    store_name: Optional[str] = None

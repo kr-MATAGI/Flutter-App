@@ -1,11 +1,12 @@
 import json
 import imghdr
-from fastapi import APIRouter, UploadFile, HTTPException
-from typing import List, Dict, Any
+from fastapi import APIRouter, UploadFile, HTTPException, Depends, File
+from typing import List, Dict, Any, Annotated
 
 
 from app.utils.logger import setup_logger
 from app.models.menu_base import MenuInfo
+from app.models.img_scan_base import ImageScanRequest
 from app.routers.controller.ocr_ctl import OCR_Controller
 from app.routers.controller.db_ctl import DBController
 
@@ -35,7 +36,10 @@ def validate_image(file: UploadFile) -> bool:
 
 
 @router.post("/image-scan")
-async def image_scan(user_id: str, store_name: str, file: UploadFile):
+async def image_scan(
+    request: Annotated[ImageScanRequest, Depends(ImageScanRequest.as_form)],
+    file: UploadFile = File(...),
+):
     """
     이미지 파일을 업로드받아 처리하는 엔드포인트
     """
@@ -146,8 +150,8 @@ async def image_scan(user_id: str, store_name: str, file: UploadFile):
 
         # JSON 가공
         menu_info_list: List[MenuInfo] = convert_json_to_menu_info(
-            user_id=user_id,
-            store_name=store_name,
+            user_id=request.user_id,
+            store_name=request.store_name,
             file_name=file.filename,
             source=menu_info,
         )
