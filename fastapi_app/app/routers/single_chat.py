@@ -1,14 +1,22 @@
 from typing import Annotated
 from fastapi import APIRouter, status, HTTPException, Depends
 from sqlalchemy.orm import Session
+from pydantic import BaseModel
 
 from app.core.config import settings
 from app.core.database import get_db
 from app.models.chat_base import ChatRequest, ChatResponse, DB_ChatLog
-from app.models.graph_state import MainAgentResponse
+from app.models.graph_state import GraphBaseState
 from app.routers.controller.agent_ctl import AgentController
 
 router = APIRouter()
+
+
+class AgentChatRequest(BaseModel):
+    message: str
+
+    class Config:
+        json_schema_extra = {"example": {"message": "안녕하세요!"}}
 
 
 @router.post("/chat")
@@ -57,12 +65,12 @@ async def send_single_chat(
 
 @router.post("/agent")
 async def get_agent_response(
-    message: str,
+    request: AgentChatRequest,
 ):
     agent_controller = AgentController()
 
     try:
-        agent_resp: str = await agent_controller.call_agent(message=message)
+        agent_resp: str = await agent_controller.call_agent(message=request.message)
 
         return {
             "status": status.HTTP_200_OK,

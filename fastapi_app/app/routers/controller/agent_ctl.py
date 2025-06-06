@@ -9,12 +9,7 @@ from PIL import Image
 from app.utils.logger import setup_logger
 from app.core.config import settings
 from app.routers.controller.persona.supervisor_prompt import get_supervisor_prompt
-from app.models.graph_state import (
-    BasicState,
-    GraphNode,
-    DB_AgentResponse,
-    MainAgentResponse,
-)
+from app.models.graph_state import GraphNode, GraphBaseState, AgentResponse
 from app.prompts.prompt_loader import load_prompt
 
 from langchain_openai import ChatOpenAI
@@ -55,6 +50,7 @@ class AgentController:
 
     # LangGraph 그래프 초기화
     _graph: StateGraph = None
+    _parser: PydanticOutputParser = None
 
     def __new__(
         cls,
@@ -122,6 +118,7 @@ class AgentController:
                 GraphNode.DB_QUERY_NODE: load_prompt("db_query"),
             }
 
+            self._parser = PydanticOutputParser(pydantic_object=AgentResponse)
             self._initialized = True
 
     def get_model_info(self) -> str:
@@ -140,47 +137,36 @@ class AgentController:
             return await self._paid_model.ainvoke(message)
 
     async def call_agent(self, message: str, use_paid_model: bool = False):
-        result = await self._graph.abatch([BasicState(message=message)])
-        return result[0]
+        # 초기 상태 생성
+        initial_state = GraphBaseState(
+            question=message,
+            next_node=GraphNode.MAIN_MODEL.value,
+            history=[],
+        )
+
+        # 그래프 실행
+        result = await self._graph.ainvoke(initial_state)
+        return result
 
     async def show_graph(self):
         logger.info(f"Showing graph for model")
 
-        # 그래프 생성
-        G = nx.DiGraph()
+        if not self._graph:
+            logger.warning("Graph not initialized")
+            return None
 
-        # 노드 추가
-        nodes = [START, END] + [node.value for node in self.GRAPH_NODE_MAPPING.keys()]
-        G.add_nodes_from(nodes)
+        try:
+            image = io.BytesIO(
+                self._graph.get_graph().draw_mermaid_png(
+                    draw_method=MermaidDrawMethod.API
+                )
+            )
 
-        # 엣지 추가
-        G.add_edge(START, GraphNode.MAIN_MODEL.value)
-        G.add_edge(GraphNode.MAIN_MODEL.value, END)
+            return image.getvalue()
 
-        # 그래프 레이아웃 설정
-        pos = nx.spring_layout(G)
-
-        # 그래프 그리기
-        plt.figure(figsize=(10, 8))
-        nx.draw(
-            G,
-            pos,
-            with_labels=True,
-            node_color="lightblue",
-            node_size=2000,
-            font_size=10,
-            font_weight="bold",
-            arrows=True,
-            edge_color="gray",
-        )
-
-        # 이미지로 저장
-        buf = io.BytesIO()
-        plt.savefig(buf, format="png", bbox_inches="tight")
-        plt.close()
-        buf.seek(0)
-
-        return buf.getvalue()
+        except Exception as e:
+            logger.error(f"Error generating graph visualization: {e}")
+            return None
 
     async def build_graph(self):
         logger.info(f"Building graph for model")
@@ -189,7 +175,7 @@ class AgentController:
             logger.info(f"Graph already exists")
 
         # Init
-        self._graph = StateGraph(BasicState)
+        self._graph = StateGraph(GraphBaseState)
 
         # Make graph nodes
         await self.make_graph_node()
@@ -198,7 +184,7 @@ class AgentController:
         await self.make_graph_edges()
 
         # Compile
-        self._graph.compile()
+        self._graph = self._graph.compile()
 
     async def make_graph_node(self):
         logger.info(
@@ -214,52 +200,128 @@ class AgentController:
 
         # START
         self._graph.add_edge(START, GraphNode.MAIN_MODEL.value)
-        # self._graph.add_edge(GraphNode.DB_QUERY_NODE.value, GraphNode.MAIN_MODEL.value)
 
-        # END
-        self._graph.add_edge(GraphNode.MAIN_MODEL.value, END)
+        # 조건부 라우팅 함수 정의
+        def route_by_node(state: GraphBaseState) -> GraphBaseState:
+            # state의 next_node 값을 바로 반환하거나 END 반환
+            return (
+                state["next_node"]
+                if state["next_node"]
+                in (GraphNode.DB_QUERY_NODE.value, GraphNode.EVAL_NODE.value)
+                else END
+            )
+
+        # 조건부 엣지 추가
+        self._graph.add_conditional_edges(
+            GraphNode.MAIN_MODEL.value,
+            route_by_node,
+            {
+                GraphNode.DB_QUERY_NODE: GraphNode.DB_QUERY_NODE.value,
+                GraphNode.EVAL_NODE: GraphNode.EVAL_NODE.value,
+            },
+        )
+
+        # DB 쿼리 노드에서 메인 모델로 돌아가는 엣지
+        self._graph.add_edge(GraphNode.DB_QUERY_NODE.value, GraphNode.EVAL_NODE.value)
 
     async def _main_model_node(
         self,
-        state: BasicState,
-    ) -> BasicState:
-        prompt: PromptTemplate = PromptTemplate.from_template(
-            self.MODEL_PROMPTS[GraphNode.MAIN_MODEL]
-        )
-        prompt_template = prompt.format(
-            question=state.message, format=MainAgentResponse
-        )
-        chain = (
-            prompt
-            | self._base_model
-            | PydanticOutputParser(pydantic_object=MainAgentResponse)
-        )
-        agent_response = await chain.ainvoke(prompt_template)
-        print(agent_response)
+        state: GraphBaseState,
+    ) -> GraphBaseState:
+        try:
+            # 프롬프트 템플릿 생성
+            prompt = PromptTemplate(
+                template=self.MODEL_PROMPTS[GraphNode.MAIN_MODEL],
+                input_variables=[
+                    "question",
+                ],
+                partial_variables={"format": self._parser.get_format_instructions()},
+            )
 
-        return agent_response
+            # 입력 데이터 준비
+            input_data = {"question": state["question"]}
+
+            # Chain 실행
+            chain = prompt | self._base_model | self._parser
+            response: AgentResponse = await chain.ainvoke(input_data)
+
+            # GraphBaseState 타입에 맞게 필드 추가
+            return GraphBaseState(
+                question=state["question"],
+                next_node=response.next_node,
+                answer=response.answer,
+                confidence_score=response.confidence_score,
+                reasoning=response.reasoning,
+                history=state["history"]
+                + [{"role": "assistant", "content": response.answer}],
+            )
+
+        except ConnectionError as e:
+            logger.error(f"Connection error to LLM service: {e}")
+            return GraphBaseState(
+                question=state["question"],
+                next_node=END,
+                answer="죄송합니다. 현재 AI 서비스에 연결할 수 없습니다.",
+                confidence_score=0.0,
+                reasoning="연결 오류",
+                history=state["history"]
+                + [
+                    {
+                        "role": "system",
+                        "content": "LLM 서비스 연결 오류가 발생했습니다.",
+                    }
+                ],
+            )
+        except Exception as e:
+            logger.error(f"Unexpected error in main model node: {e}")
+            return GraphBaseState(
+                question=state["question"],
+                next_node=END,
+                answer="죄송합니다. 처리 중 오류가 발생했습니다.",
+                confidence_score=0.0,
+                reasoning="처리 오류",
+                history=state["history"]
+                + [{"role": "system", "content": f"오류 발생: {str(e)}"}],
+            )
 
     async def _db_search_node(
         self,
-        state: BasicState,
-    ) -> BasicState:
+        state: GraphBaseState,
+    ) -> GraphBaseState:
         prompt: PromptTemplate = PromptTemplate.from_template(
             self.MODEL_PROMPTS[GraphNode.DB_QUERY_NODE]
         )
-        prompt_template = prompt.format(question=state.message, format=DB_AgentResponse)
-        chain = (
-            prompt
-            | self._base_model
-            | PydanticOutputParser(pydantic_object=DB_AgentResponse)
+
+        # 입력 데이터 준비
+        input_data = {
+            "question": state["question"],
+            "history": state["history"],
+            "format": self._parser.get_format_instructions(),
+        }
+
+        # Chain 실행
+        chain = prompt | self._base_model | self._parser
+        response: AgentResponse = await chain.ainvoke(input_data)
+
+        return GraphBaseState(
+            question=state["question"],
+            next_node=response.next_node,
+            answer=response.answer,
+            confidence_score=0.0,
+            reasoning=response.reasoning,
+            history=state["history"]
+            + [{"role": "assistant", "content": response.answer}],
         )
-        agent_response = await chain.ainvoke(prompt_template)
-
-        print(agent_response)
-
-        return agent_response
 
     async def _eval_node(
         self,
-        state: BasicState,
-    ) -> BasicState:
-        pass
+        state: GraphBaseState,
+    ) -> GraphBaseState:
+        return GraphBaseState(
+            question=state["question"],
+            next_node=GraphNode.MAIN_MODEL.value,
+            answer=state["answer"],
+            confidence_score=0.0,
+            reasoning="평가 완료",
+            history=state["history"] + [{"role": "system", "content": "평가 완료"}],
+        )
