@@ -9,7 +9,12 @@ from PIL import Image
 from app.utils.logger import setup_logger
 from app.core.config import settings
 from app.routers.controller.persona.supervisor_prompt import get_supervisor_prompt
-from app.models.graph_state import GraphNode, GraphBaseState, AgentResponse
+from app.models.graph_state import (
+    GraphNode,
+    GraphBaseState,
+    AgentResponse,
+    EvalResponse,
+)
 from app.prompts.prompt_loader import load_prompt
 
 from langchain_openai import ChatOpenAI
@@ -50,7 +55,6 @@ class AgentController:
 
     # LangGraph 그래프 초기화
     _graph: StateGraph = None
-    _parser: PydanticOutputParser = None
 
     def __new__(
         cls,
@@ -108,7 +112,7 @@ class AgentController:
             logger.info(f"Initialized Paid Model: {self._paid_model_name}")
 
             self.GRAPH_NODE_MAPPING = {
-                GraphNode.MAIN_MODEL: self._main_model_node,
+                GraphNode.MAIN_MODEL: self._main_node,
                 GraphNode.DB_QUERY_NODE: self._db_search_node,
                 GraphNode.EVAL_NODE: self._eval_node,
             }
@@ -116,9 +120,9 @@ class AgentController:
             self.MODEL_PROMPTS = {
                 GraphNode.MAIN_MODEL: load_prompt("main_model"),
                 GraphNode.DB_QUERY_NODE: load_prompt("db_query"),
+                GraphNode.EVAL_NODE: load_prompt("eval_node"),
             }
 
-            self._parser = PydanticOutputParser(pydantic_object=AgentResponse)
             self._initialized = True
 
     def get_model_info(self) -> str:
@@ -146,6 +150,7 @@ class AgentController:
 
         # 그래프 실행
         result = await self._graph.ainvoke(initial_state)
+        logger.info(f"Agent result: {result}")
         return result
 
     async def show_graph(self):
@@ -217,33 +222,43 @@ class AgentController:
             route_by_node,
             {
                 GraphNode.DB_QUERY_NODE: GraphNode.DB_QUERY_NODE.value,
-                GraphNode.EVAL_NODE: GraphNode.EVAL_NODE.value,
             },
+        )
+
+        self._graph.add_conditional_edges(
+            GraphNode.EVAL_NODE.value,
+            route_by_node,
+            {GraphNode.DB_QUERY_NODE: GraphNode.DB_QUERY_NODE.value},
         )
 
         # DB 쿼리 노드에서 메인 모델로 돌아가는 엣지
         self._graph.add_edge(GraphNode.DB_QUERY_NODE.value, GraphNode.EVAL_NODE.value)
 
-    async def _main_model_node(
+    async def _main_node(
         self,
         state: GraphBaseState,
     ) -> GraphBaseState:
         try:
             # 프롬프트 템플릿 생성
-            prompt = PromptTemplate(
+            parser: PydanticOutputParser = PydanticOutputParser(
+                pydantic_object=AgentResponse
+            )
+            prompt: PromptTemplate = PromptTemplate(
                 template=self.MODEL_PROMPTS[GraphNode.MAIN_MODEL],
                 input_variables=[
                     "question",
                 ],
-                partial_variables={"format": self._parser.get_format_instructions()},
+                partial_variables={"format": parser.get_format_instructions()},
             )
 
             # 입력 데이터 준비
             input_data = {"question": state["question"]}
 
             # Chain 실행
-            chain = prompt | self._base_model | self._parser
+            chain = prompt | self._base_model | parser
             response: AgentResponse = await chain.ainvoke(input_data)
+
+            logger.info(f"Main node response: {response}")
 
             # GraphBaseState 타입에 맞게 필드 추가
             return GraphBaseState(
@@ -291,16 +306,19 @@ class AgentController:
         prompt: PromptTemplate = PromptTemplate.from_template(
             self.MODEL_PROMPTS[GraphNode.DB_QUERY_NODE]
         )
+        parser: PydanticOutputParser = PydanticOutputParser(
+            pydantic_object=AgentResponse
+        )
 
         # 입력 데이터 준비
         input_data = {
             "question": state["question"],
             "history": state["history"],
-            "format": self._parser.get_format_instructions(),
+            "format": parser.get_format_instructions(),
         }
 
         # Chain 실행
-        chain = prompt | self._base_model | self._parser
+        chain = prompt | self._base_model | parser
         response: AgentResponse = await chain.ainvoke(input_data)
 
         return GraphBaseState(
@@ -317,11 +335,42 @@ class AgentController:
         self,
         state: GraphBaseState,
     ) -> GraphBaseState:
+        logger.info(f"Eval node input state: {state}")
+
+        parser: PydanticOutputParser = PydanticOutputParser(
+            pydantic_object=EvalResponse
+        )
+        prompt: PromptTemplate = PromptTemplate(
+            template=self.MODEL_PROMPTS[GraphNode.EVAL_NODE],
+            input_variables=[
+                "question",
+                "prev_answer",
+                "prev_reasoning",
+                "prev_node_selected",
+            ],
+            partial_variables={"format": parser.get_format_instructions()},
+        )
+
+        # 입력 데이터 준비
+        input_data = {
+            "question": state["question"],
+            "prev_answer": state["answer"],
+            "prev_reasoning": state["reasoning"],
+            "prev_node_selected": state["next_node"],
+        }
+
+        # Chain 실행
+        chain = prompt | self._base_model | parser
+        response: EvalResponse = await chain.ainvoke(input_data)
+
+        logger.info(f"Eval node response: {response}")
+
         return GraphBaseState(
             question=state["question"],
-            next_node=GraphNode.MAIN_MODEL.value,
+            next_node=response.next_node,
             answer=state["answer"],
             confidence_score=0.0,
-            reasoning="평가 완료",
+            reasoning=response.quality_score,
+            feedback=response.feedback,
             history=state["history"] + [{"role": "system", "content": "평가 완료"}],
         )

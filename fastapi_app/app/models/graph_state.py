@@ -15,7 +15,9 @@ class GraphBaseState(TypedDict):
     answer: Annotated[str, "The answer to the question"]
     confidence_score: Annotated[float, "The confidence score of the answer"]
     next_node: Annotated[str, "The next node to be executed"]
+    prev_node: Annotated[str, "The previous node to be executed"]
     reasoning: Annotated[str, "Reason for node selection (0~1)"]
+    feedback: Annotated[str, "Detailed feedback for improvement"]
     history: Annotated[list[str], "The history of the conversation"]
 
 
@@ -24,3 +26,13 @@ class AgentResponse(BaseModel):
     next_node: str = Field(description="The next node to be executed")
     confidence_score: float = Field(description="The confidence score of the answer")
     reasoning: str = Field(description="Reason for node selection (0~1)")
+
+
+class EvalResponse(BaseModel):
+    quality_score: float = Field(description="The quality score of the answer")
+    need_improvement: bool = Field(description="Whether the response needs improvement")
+    improvement_areas: list[str] = Field(
+        description="Specific areas needing improvement"
+    )
+    next_node: str = Field(description="The next node to be executed")
+    feedback: str = Field(description="Detailed feedback for improvement")

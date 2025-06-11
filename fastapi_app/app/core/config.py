@@ -60,6 +60,12 @@ class Settings(BaseSettings):
 
     OPENAI_API_KEY: str = os.getenv("OPENAI_API_KEY", "Plz Check .env file")
 
+    # LangSmith
+    LANG_SMITH_API_KEY: str = os.getenv("LANG_SMITH_API_KEY", "Plz Check .env file")
+    LANG_SMITH_ENDPOINT: str = os.getenv("LANG_SMITH_ENDPOINT", "Plz Check .env file")
+    LANG_SMITH_PROJECT: str = os.getenv("LANG_SMITH_PROJECT", "Plz Check .env file")
+    LANG_SMITH_TRACING_V2: bool = os.getenv("LANG_SMITH_TRACING_V2", True)
+
     class Config:
         case_sensitive = True
 
