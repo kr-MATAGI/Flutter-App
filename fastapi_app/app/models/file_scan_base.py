@@ -10,3 +10,4 @@ class ImageScanRequest(BaseModel):
         json_schema_extra = {
             "example": {"user_id": "user123", "store_name": "맛있는 식당"}
         }
+

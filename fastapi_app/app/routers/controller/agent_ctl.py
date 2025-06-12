@@ -16,6 +16,7 @@ from app.models.graph_state import (
     EvalResponse,
 )
 from app.prompts.prompt_loader import load_prompt
+from app.routers.controller.rag_ctl import RAGController
 
 from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import PydanticOutputParser

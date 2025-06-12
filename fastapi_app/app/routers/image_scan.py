@@ -6,7 +6,7 @@ from typing import List, Dict, Any, Annotated
 
 from app.utils.logger import setup_logger
 from app.models.menu_base import MenuInfo
-from app.models.img_scan_base import ImageScanRequest
+from app.models.file_scan_base import ImageScanRequest
 from app.routers.controller.ocr_ctl import OCR_Controller
 from app.routers.controller.db_ctl import DBController
 
@@ -25,6 +25,7 @@ def validate_image(file: UploadFile) -> bool:
     # 파일 확장자 검사
     file_ext = file.filename.split(".")[-1].lower()
     if file_ext not in ALLOWED_IMAGE_TYPES:
+        logger.warning(f"허용되지 않는 이미지 파일 형식: {file.filename}")
         return False
 
     # 파일 내용 검사
