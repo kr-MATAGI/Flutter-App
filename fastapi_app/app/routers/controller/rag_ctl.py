@@ -71,8 +71,21 @@ class RAGController:
         else:
             index = VectorStoreIndex(
                 [],  # 인덱싱할 문서 리스트
-                storage_context=store_context, # 인덱스 저장할 경로
-                service_context=self.service_context, # 정책 설정
+                storage_context=store_context,  # 인덱스 저장할 경로
+                service_context=self.service_context,  # 정책 설정
             )
 
         return index
+
+    def get_rag_response(self, query: str, top_k: int = 3):
+        """
+        문서 검색 결과를 반환
+        """
+        index = self.create_or_load_index()
+        query_engine = index.as_query_engine()
+
+        response = query_engine.query(query)
+
+        logger.info(f"RAG query: {query}, response: {response}")
+
+        return response
