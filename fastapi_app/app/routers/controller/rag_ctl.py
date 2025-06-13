@@ -4,14 +4,15 @@ from typing import Optional
 from app.utils.logger import setup_logger
 
 import chromadb
-from llama_index import (
-    VectorStoreIndex,  # 임베딩된 문서를 벡터 DB로 연결하고, 검색할 수 있게 만드는 클래스
+
+from llama_index.core import (
+    VectorStoreIndex, # 임베딩된 문서를 벡터 DB로 연결하고, 검색할 수 있게 만드는 클래스
     ServiceContext,  # LLM, 임베딩 모델, 프롬프트 전략 등 공통 설정을 관리
     Document,  # 텍스트 한 조각(문단/문서)을 표현
     StorageContext,  # 인덱스를 저장하거나 불러올 때 사용하는 저장소
     load_index_from_storage,  # 이전에 저장된 인덱스를 다시 불러옴
 )
-from llama_index.vector_stores import ChromaVectorStore
+from llama_index.vector_stores.chroma import ChromaVectorStore
 
 logger = setup_logger("RAGController")
 
