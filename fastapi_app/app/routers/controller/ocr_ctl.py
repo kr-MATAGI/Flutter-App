@@ -23,7 +23,7 @@ class OCR_Controller:
     def __init__(self, model_name: str = "gpt-4o"):
         if not hasattr(self, "_initialized"):
             self._model_name = model_name
-            self.llm = ChatOpenAI(
+            self._model = ChatOpenAI(
                 model=self._model_name,
                 api_key=settings.OPENAI_API_KEY,
             )

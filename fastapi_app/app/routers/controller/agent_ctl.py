@@ -22,7 +22,7 @@ from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import PydanticOutputParser
 from langchain_core.prompts import PromptTemplate
 from langchain_core.runnables.graph import MermaidDrawMethod
-from langchain_community.llms import Ollama
+from langchain_ollama import OllamaLLM
 
 from langgraph.graph import START, END, StateGraph
 
@@ -48,7 +48,7 @@ class AgentController:
     GRAPH_NODE_MAPPING = {}
     MODEL_PROMPTS = {}
 
-    _base_model: Ollama = None
+    _base_model: OllamaLLM = None
     _base_model_name: str = ""
 
     _paid_model: Any = None
@@ -80,12 +80,12 @@ class AgentController:
             try:
                 self._base_model_name = base_model_name
                 if "llama" in self._base_model_name:
-                    self._base_model = Ollama(model=self._base_model_name)
+                    self._base_model = OllamaLLM(model=self._base_model_name)
                 elif self._base_model_name == "gpt-4o":
                     self._base_model = ChatOpenAI(model=self._base_model_name)
                 else:
                     # 예외 처리
-                    self._base_model = Ollama(model=self._base_model_name)
+                    self._base_model = OllamaLLM(model=self._base_model_name)
             except Exception as e:
                 logger.error(f"Error initializing base model: {e}")
                 raise e

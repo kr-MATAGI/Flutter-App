@@ -15,6 +15,7 @@ from app.routers import (
     user_info,
     image_scan,
     menu_info,
+    sample_router
 )
 
 from app.routers.controller.agent_ctl import AgentController
@@ -73,6 +74,7 @@ app.include_router(status.router, prefix="/api/v1/status", tags=["status"])
 app.include_router(user_info.router, prefix="/api/v1/user-info", tags=["user-info"])
 app.include_router(image_scan.router, prefix="/api/v1/image-scan", tags=["image-scan"])
 app.include_router(menu_info.router, prefix="/api/v1/menu-info", tags=["menu-info"])
+app.include_router(sample_router.router, prefix="/api/v1/sample", tags=["sample"])
 
 
 # 커스텀 OpenAPI 스키마

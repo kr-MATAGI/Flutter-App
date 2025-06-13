@@ -1,10 +1,10 @@
-from fastapi import APIRouter, UploadFile, HTTPException, File
+from fastapi import APIRouter, UploadFile, HTTPException, File, status
 from typing import List, Dict, Any
 
 from app.utils.logger import setup_logger
 
 router = APIRouter()
-logger = setup_logger("Doc_Scan")
+logger = setup_logger("[Router] Doc_Scan")
 
 ALLOWED_DOC_TYPES = {"pdf", "docx", "doc"}
 
@@ -31,7 +31,10 @@ async def doc_scan(
 
     try:
         if not file:
-            raise HTTPException(status_code=400, detail="파일이 업로드되지 않았습니다.")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, 
+                detail="파일이 업로드되지 않았습니다."
+            )
 
         # 파일 크기 제한 (예: 10MB)
         MAX_FILE_SIZE = 10 * 1024 * 1024  # 10MB in bytes

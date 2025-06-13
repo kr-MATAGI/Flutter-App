@@ -1,6 +1,6 @@
 import json
 import imghdr
-from fastapi import APIRouter, UploadFile, HTTPException, Depends, File
+from fastapi import APIRouter, UploadFile, HTTPException, Depends, File, Form
 from typing import List, Dict, Any, Annotated
 
 
@@ -38,7 +38,8 @@ def validate_image(file: UploadFile) -> bool:
 
 @router.post("/image-scan")
 async def image_scan(
-    request: ImageScanRequest,
+    user_id: str = Form(...),
+    store_name: str = Form(...),
     file: UploadFile = File(...),
 ):
     """
@@ -151,8 +152,8 @@ async def image_scan(
 
         # JSON 가공
         menu_info_list: List[MenuInfo] = convert_json_to_menu_info(
-            user_id=request.user_id,
-            store_name=request.store_name,
+            user_id=user_id,
+            store_name=store_name,
             file_name=file.filename,
             source=menu_info,
         )
