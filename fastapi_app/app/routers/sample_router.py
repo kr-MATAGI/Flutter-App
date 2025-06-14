@@ -1,20 +1,43 @@
-from app.utils.logger import setup_logger
-
 import chromadb
 import os
 import tempfile
+import faiss
+import numpy as np
+from  enum import Enum
+from typing import Any
 from fastapi import APIRouter, status, HTTPException, Form, File, UploadFile
+
+
 from langchain_ollama import OllamaLLM
 from langchain.text_splitter import RecursiveCharacterTextSplitter
 from langchain_community.document_loaders import PyPDFLoader
 from langchain_ollama import OllamaEmbeddings
 from langchain_chroma import Chroma
+from langchain_community.vectorstores import FAISS
+from langchain_core.documents import Document
+
+from app.utils.logger import setup_logger
 
 logger = setup_logger("SampleRouter")
 
 router = APIRouter()
 
-ALLOWED_DOC_TYPES = {"pdf", "docx", "doc"}
+ALLOWED_DOC_TYPES = {"pdf"}
+
+class VectorDBType(Enum):
+    FAISS = "faiss"
+    WEAVIATE = "weaviate"
+    QDRANT = "qdrant"
+    CHROMA = "chroma"
+
+class OllamaModelType(Enum):
+    LLAMA3_1 = "llama3.1"
+    GEMMA3 = "gemma3:12b"
+
+class PdfReaderType(Enum):
+    PyPDF = "pypdf"
+    PyMuPDF = "pymupdf"
+    UnstructuredPDFLoader = "unstructured_pdf_loader"
 
 def validate_doc(file: UploadFile) -> bool:
     """
@@ -30,11 +53,45 @@ def validate_doc(file: UploadFile) -> bool:
 @router.post("/rag-test-insert")
 async def rag_sample(
     collection_name: str = Form(...),
+    vector_db_type: VectorDBType = Form(...),
+    pdf_reader_type: PdfReaderType = Form(...),
     upload_file: UploadFile = File(...),
 ):
     """
     PDF 파일을 업로드하여 RAG 시스템에 저장하는 엔드포인트
     """
+
+    def insert_chroma_db(
+        collection_name: str,
+        embeddings: OllamaEmbeddings,
+        persist_dir: str,
+    ):
+        vectorstore = Chroma(
+            collection_name=collection_name,
+            embedding_function=embeddings,
+            persist_directory=persist_dir
+        )
+
+        # 문서 저장
+        vectorstore.add_documents(chunks)
+
+    def insert_faiss_db(
+        collection_name: str,
+        chunks: Any,
+        embeddings: OllamaEmbeddings,
+        persist_dir: str,
+    ):
+        # FAISS 인덱스 생성
+        vectorstore = FAISS.from_documents(
+            documents=chunks,
+            embedding=embeddings,
+        )
+
+        # FASISS 인덱스 저장
+        save_path = os.path.join(persist_dir, f"{collection_name}.faiss")
+        vector_store = vectorstore.save_local(save_path)
+    
+
     temp_file_path = None
     try:
         logger.info("-" * 20)
@@ -69,21 +126,24 @@ async def rag_sample(
         # 임베딩 모델 초기화
         embeddings = OllamaEmbeddings(model="llama3.1")
         
-        # Chroma DB 설정
-        persist_dir = os.path.join(os.getcwd(), "rag", "test_chroma_db")
+        # Vector DB 설정
+        persist_dir = os.path.join(os.getcwd(), "rag", f"test_{vector_db_type.value}")
         os.makedirs(persist_dir, exist_ok=True)  # 디렉토리가 없으면 생성
         
-        logger.info(f"Chroma DB 저장 경로: {persist_dir}")
+        logger.info(f"Vector DB 저장 경로: {persist_dir}")
         
-        vectorstore = Chroma(
-            collection_name=collection_name,
-            embedding_function=embeddings,
-            persist_directory=persist_dir
-        )
-
-        # 문서 저장
-        vectorstore.add_documents(chunks)
-
+        # Vector Store 정의
+        if VectorDBType.CHROMA == vector_db_type:
+            insert_chroma_db(collection_name, embeddings, persist_dir)
+        elif VectorDBType.FAISS == vector_db_type:
+            insert_faiss_db(collection_name, chunks, embeddings, persist_dir)
+        elif VectorDBType.QDRANT == vector_db_type:
+            pass
+        elif VectorDBType.WEAVIATE == vector_db_type:
+            pass
+        else:
+            logger.error(f"지원하지 않는 Vector DB 타입: {vector_db_type}")
+        
         logger.info(f"문서가 성공적으로 저장되었습니다. 청크 수: {len(chunks)}")
         logger.info("-" * 20)
 
@@ -108,23 +168,18 @@ async def rag_sample(
 async def rag_query(
     collection_name: str,
     query: str,
+    vector_db_type: VectorDBType,
     k: int = 3
 ):
     """
     RAG 시스템에서 문서를 검색하는 엔드포인트
     """
-    try:
-        # 임베딩 모델 초기화
-        embeddings = OllamaEmbeddings(model="llama3.1")
-        
-        # Chroma DB 설정
-        persist_dir = os.path.join(os.getcwd(), "rag", "test_chroma_db")
-        if not os.path.exists(persist_dir):
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail="Chroma DB가 초기화되지 않았습니다. 먼저 문서를 업로드해주세요."
-            )
-            
+    def query_chroma_db(
+        persist_dr: str,
+        collection_name: str,
+        query: str,
+        k: int
+    ):
         vectorstore = Chroma(
             collection_name=collection_name,
             embedding_function=embeddings,
@@ -133,6 +188,43 @@ async def rag_query(
 
         # 유사 문서 검색
         docs = vectorstore.similarity_search(query, k=k)
+        return docs
+
+
+    def query_faiss_db(
+        persist_dir: str,
+        collection_name: str,
+        query: str,
+        k: int
+    ):
+        vectorstore = FAISS.load_local(
+            os.path.join(os.getcwd(), "rag", persist_dir, f"{collection_name}.faiss"),
+            embeddings,
+            allow_dangerous_deserialization=True  # 신뢰할 수 있는 로컬 파일이므로 True로 설정
+        )
+        docs = vectorstore.similarity_search(query, k=k)
+        return docs
+
+    try:
+        # 임베딩 모델 초기화
+        embeddings = OllamaEmbeddings(model="llama3.1")
+        
+        # Vector DB 설정
+        persist_dir = os.path.join(os.getcwd(), "rag", f"test_{vector_db_type.value}")
+        if not os.path.exists(persist_dir):
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail="Vector DB가 초기화되지 않았습니다. 먼저 문서를 업로드해주세요."
+            )
+            
+        docs = None
+        query_functions = {
+            VectorDBType.CHROMA: query_chroma_db,
+            VectorDBType.FAISS: query_faiss_db,
+        }
+        
+        if vector_db_type in query_functions:
+            docs = query_functions[vector_db_type](persist_dir, collection_name, query, k)
         
         # 결과 포맷팅
         results = []
