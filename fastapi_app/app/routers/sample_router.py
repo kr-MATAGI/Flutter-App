@@ -14,7 +14,11 @@ from langchain_community.document_loaders import PyPDFLoader
 from langchain_ollama import OllamaEmbeddings
 from langchain_chroma import Chroma
 from langchain_community.vectorstores import FAISS
+from langchain_qdrant import Qdrant
 from langchain_core.documents import Document
+
+from qdrant_client import QdrantClient # 벡터 검색 엔진과 통신
+from qdrant_client.http.models import models # Qdrant HTTP API의 요청, 응답 스키마
 
 from app.utils.logger import setup_logger
 
@@ -90,6 +94,45 @@ async def rag_sample(
         # FASISS 인덱스 저장
         save_path = os.path.join(persist_dir, f"{collection_name}.faiss")
         vector_store = vectorstore.save_local(save_path)
+
+    def insert_qdrant_db(
+        collection_name: str,
+        chunks: Any,
+        embeddings: OllamaEmbeddings,
+        persist_dir: str,
+        host: str = "localhost",
+        port: int = 6333,
+    ):
+        # Qdrant 클라이언트 초기화 (Docker 환경)
+        client = QdrantClient(
+            host=host,
+            port=port
+        )
+
+        # collection 존재 여부 확인
+        collections = client.get_collections().collections
+        collection_names = [collection.name for collection in collections]
+
+        # collection 생성
+        if collection_name not in collection_names:
+            client.create_collection(
+                collection_name=collection_name,
+                vectors_config=models.VectorParams(
+                    size=4096, # 임베딩 차원
+                    distance=models.Distance.COSINE,
+                )
+            )
+            logger.info(f"Qdrant 컬렉션이 생성되었습니다: {collection_name}")
+
+        # Qdrant 벡터 스토어 생성
+        vectorstore = Qdrant(
+            client=client,
+            collection_name=collection_name,
+            embeddings=embeddings,
+        )
+
+        # 문서 저장
+        vectorstore.add_documents(chunks)
     
 
     temp_file_path = None
@@ -124,7 +167,7 @@ async def rag_sample(
         chunks = text_splitter.split_documents(pages)
 
         # 임베딩 모델 초기화
-        embeddings = OllamaEmbeddings(model="llama3.1")
+        embed_model = OllamaEmbeddings(model="llama3.1")
         
         # Vector DB 설정
         persist_dir = os.path.join(os.getcwd(), "rag", f"test_{vector_db_type.value}")
@@ -134,11 +177,11 @@ async def rag_sample(
         
         # Vector Store 정의
         if VectorDBType.CHROMA == vector_db_type:
-            insert_chroma_db(collection_name, embeddings, persist_dir)
+            insert_chroma_db(collection_name, embed_model, persist_dir)
         elif VectorDBType.FAISS == vector_db_type:
-            insert_faiss_db(collection_name, chunks, embeddings, persist_dir)
+            insert_faiss_db(collection_name, chunks, embed_model, persist_dir)
         elif VectorDBType.QDRANT == vector_db_type:
-            pass
+            insert_qdrant_db(collection_name, chunks, embed_model, persist_dir)
         elif VectorDBType.WEAVIATE == vector_db_type:
             pass
         else:
@@ -205,6 +248,37 @@ async def rag_query(
         docs = vectorstore.similarity_search(query, k=k)
         return docs
 
+    def query_qdrant_db(
+        persist_dir: str,
+        collection_name: str,
+        query: str,
+        k: int,
+        host: str = "localhost",
+        port: int = 6333,
+    ):
+        client = QdrantClient(
+            host=host,
+            port=port
+        )
+
+        # collection 존재 여부 확인
+        collections = client.get_collections().collections
+        collection_names = [collection.name for collection in collections]
+        if collection_name not in collection_names:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail=f"Qdrant 컬렉션이 존재하지 않습니다: {collection_name}"
+            )
+
+        vectorstore = Qdrant(
+            client=client,
+            collection_name=collection_name,
+            embeddings=embeddings,
+        )
+
+        docs = vectorstore.similarity_search(query, k=k)
+        return docs
+
     try:
         # 임베딩 모델 초기화
         embeddings = OllamaEmbeddings(model="llama3.1")
@@ -221,6 +295,7 @@ async def rag_query(
         query_functions = {
             VectorDBType.CHROMA: query_chroma_db,
             VectorDBType.FAISS: query_faiss_db,
+            VectorDBType.QDRANT: query_qdrant_db,
         }
         
         if vector_db_type in query_functions:
