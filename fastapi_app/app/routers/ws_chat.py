@@ -17,9 +17,6 @@ logger = setup_logger("ws_chat")
 CHAT_TOPIC = "chat_messages"
 KAFKA_GROUP_ID = "chat_group"
 
-# Controller
-agent_controller = AgentController()
-
 
 # 활성 연결을 관리하는 클래스
 class ConnectionManager:

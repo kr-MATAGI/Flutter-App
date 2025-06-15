@@ -1,10 +1,8 @@
 import os
 import io
-import networkx as nx
-import matplotlib.pyplot as plt
+import asyncio
 from enum import Enum
-from typing import Optional, Dict, Any
-from PIL import Image
+from typing import Optional, Any
 
 from app.utils.logger import setup_logger
 from app.core.config import settings
@@ -33,7 +31,6 @@ logger = setup_logger("AgentController")
 class LLMType(Enum):
     CHAT_GPT = "gpt4o"  # GPT-4o
     CLAUDE = "claude3.5"  # Claude 3.5 Sonnet
-    GEMINI = "gemini2.0"  # Gemini 2.0 Flash
 
     # Open Source
     LLAMA = "llama3.1"  # Llama 3.1 8B
@@ -57,29 +54,21 @@ class AgentController:
     # LangGraph 그래프 초기화
     _graph: StateGraph = None
 
-    def __new__(
-        cls,
-        base_model_name: str = "llama3.1",
-        paid_model_name: str = "gpt-4o",
-    ) -> "AgentController":
+    def __new__(cls) -> "AgentController":
         if not cls._instance:
             logger.info(f"Creating new AgentController instance")
             cls._instance = super(AgentController, cls).__new__(cls)
-            cls._instance._base_model_name = base_model_name
-            cls._instance._paid_model_name = paid_model_name
             cls._instance._initialized = False
 
         return cls._instance
 
-    def __init__(
-        self, base_model_name: str = "llama3.1", paid_model_name: str = "gpt-4o"
-    ):
+    def __init__(self):
         # 이미 초기화된 인스턴스는 다시 초기화하지 않음
         if not self._initialized:
             # Base Model (Free)
             try:
-                self._base_model_name = base_model_name
-                if "llama" in self._base_model_name:
+                self._base_model_name = settings.BASE_AI_MODEL
+                if self._base_model_name in ["llama3.1", "llama3.2", "gemma3:12b"]:
                     self._base_model = OllamaLLM(model=self._base_model_name)
                 elif self._base_model_name == "gpt-4o":
                     self._base_model = ChatOpenAI(model=self._base_model_name)
@@ -94,15 +83,10 @@ class AgentController:
 
             # Paid Model
             try:
-                self._paid_model_name = paid_model_name
+                # @TODO: 다양한 유료 모델 추가
+                self._paid_model_name = settings.PAID_AI_MODEL
                 if self._paid_model_name == "gpt-4o":
                     self._paid_model = ChatOpenAI(model=self._paid_model_name)
-                elif self._paid_model_name == "claude":
-                    # @TODO: 클로드 모델 추가
-                    pass
-                elif self._paid_model_name == "gemini":
-                    # @TODO: Gemini 모델 추가
-                    pass
                 else:
                     # 예외 처리
                     self._paid_model = ChatOpenAI(model=self._paid_model_name)
@@ -119,8 +103,8 @@ class AgentController:
             }
 
             self.MODEL_PROMPTS = {
-                GraphNode.MAIN_MODEL: load_prompt("main_model"),
-                GraphNode.DB_QUERY_NODE: load_prompt("db_query"),
+                GraphNode.MAIN_MODEL: load_prompt("main_node"),
+                GraphNode.DB_QUERY_NODE: load_prompt("db_node"),
                 GraphNode.EVAL_NODE: load_prompt("eval_node"),
             }
 
@@ -192,14 +176,16 @@ class AgentController:
         # Compile
         self._graph = self._graph.compile()
 
+
     async def make_graph_node(self):
         logger.info(
             f"Making graph nodes for model: {[x.value for x in self.GRAPH_NODE_MAPPING.keys()]}"
         )
-
+        
         for node, node_func in self.GRAPH_NODE_MAPPING.items():
             self._graph.add_node(node.value, node_func)
             logger.info(f"Added node: {node.value}, {str(node_func.__name__)}")
+
 
     async def make_graph_edges(self):
         logger.info(f"Making graph edges for model")
@@ -208,32 +194,26 @@ class AgentController:
         self._graph.add_edge(START, GraphNode.MAIN_MODEL.value)
 
         # 조건부 라우팅 함수 정의
-        def route_by_node(state: GraphBaseState) -> GraphBaseState:
-            # state의 next_node 값을 바로 반환하거나 END 반환
-            return (
-                state["next_node"]
-                if state["next_node"]
-                in (GraphNode.DB_QUERY_NODE.value, GraphNode.EVAL_NODE.value)
-                else END
-            )
+        def route_by_node(state: GraphBaseState) -> str:
+            # next_node가 None이면 END 반환
+            if state["next_node"] is None:
+                return END
+            # state의 next_node 값을 반환
+            return state["next_node"]
 
         # 조건부 엣지 추가
         self._graph.add_conditional_edges(
             GraphNode.MAIN_MODEL.value,
             route_by_node,
             {
-                GraphNode.DB_QUERY_NODE: GraphNode.DB_QUERY_NODE.value,
+                GraphNode.DB_QUERY_NODE.value: GraphNode.DB_QUERY_NODE.value,
+                END: END
             },
-        )
-
-        self._graph.add_conditional_edges(
-            GraphNode.EVAL_NODE.value,
-            route_by_node,
-            {GraphNode.DB_QUERY_NODE: GraphNode.DB_QUERY_NODE.value},
         )
 
         # DB 쿼리 노드에서 메인 모델로 돌아가는 엣지
         self._graph.add_edge(GraphNode.DB_QUERY_NODE.value, GraphNode.EVAL_NODE.value)
+
 
     async def _main_node(
         self,
@@ -259,12 +239,11 @@ class AgentController:
             chain = prompt | self._base_model | parser
             response: AgentResponse = await chain.ainvoke(input_data)
 
-            logger.info(f"Main node response: {response}")
-
             # GraphBaseState 타입에 맞게 필드 추가
             return GraphBaseState(
                 question=state["question"],
                 next_node=response.next_node,
+                prev_node=GraphNode.MAIN_MODEL.value,
                 answer=response.answer,
                 confidence_score=response.confidence_score,
                 reasoning=response.reasoning,

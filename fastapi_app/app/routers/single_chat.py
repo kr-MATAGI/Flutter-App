@@ -8,9 +8,11 @@ from app.core.database import get_db
 from app.models.chat_base import ChatRequest, ChatResponse, DB_ChatLog
 from app.models.graph_state import GraphBaseState
 from app.routers.controller.agent_ctl import AgentController
+from app.utils.logger import setup_logger
 
 router = APIRouter()
 
+logger = setup_logger("[Router] Single Chat")
 
 class AgentChatRequest(BaseModel):
     message: str
@@ -70,12 +72,20 @@ async def get_agent_response(
     agent_controller = AgentController()
 
     try:
-        agent_resp: str = await agent_controller.call_agent(message=request.message)
+        agent_resp: GraphBaseState = await agent_controller.call_agent(
+            message=request.message
+        )
 
         return {
             "status": status.HTTP_200_OK,
-            "data": agent_resp,
+            "data": {
+                "answer": agent_resp["answer"],
+                "next_node": agent_resp["next_node"],
+                "confidence_score": agent_resp["confidence_score"],
+                "reasoning": agent_resp["reasoning"]
+            },
         }
 
     except Exception as e:
+        logger.error(f"Error in agent response: {e}")
         raise HTTPException(status_code=500, detail=str(e))

@@ -1,4 +1,4 @@
-db_query:
+db_node:
   description: SQL query generation prompt
   content: |
     You are an expert SQL assistant. Generate a valid SQL query based on the user's input.
@@ -8,6 +8,20 @@ db_query:
     - menu_name (text): The name of the menu.
     - cost (text): The cost of the menu.
     - order_count (integer): The number of times the menu has been ordered.
+
+    사용가능한 테이블 :
+    1. menu_info:
+       - user_id (PK): Unique customer identifier
+       - menu_name: Menu item name
+       - cost: Menu item price
+       - store_name: Store name
+    
+    2. order_log:
+       - user_id (PK): Unique customer identifier
+       - order_item: Name of food item ordered by user
+       - order_count: Quantity of food items ordered by user
+       - location: Location where user placed the order
+       - add_date: Order date
 
     User Input: {question}
     Format: {format} 

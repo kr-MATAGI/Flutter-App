@@ -29,9 +29,9 @@ from app.routers.controller.ocr_ctl import OCR_Controller
 async def lifespan(app: FastAPI):
     ### Controller 초기화
     # AI Model
-    agent_controller = AgentController(
-        base_model_name=settings.FREE_AI_MODEL, paid_model_name=settings.AI_MODEL
-    )
+    agent_controller = AgentController()
+    await agent_controller.build_graph()
+
     ocr_controller = OCR_Controller(model_name=settings.OCR_AI_MODEL)
 
     # DB
@@ -39,10 +39,10 @@ async def lifespan(app: FastAPI):
 
     # Resource
     res_controller = ResController()
+    
+    # 이전의 코드는 app startup 시 실행되는 코드, 이후 코드는 종료시 실행
+    yield 
 
-    # Startup
-    await agent_controller.build_graph()
-    yield # 이전의 코드는 app startup 시 실행되는 코드, 이후 코드는 종료시 실행
     # Shutdown
     pass
 
@@ -119,4 +119,10 @@ async def root():
     return {"message": "AI Chat API에 오신 것을 환영합니다!"}
 
 def start():
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    uvicorn.run(
+        "app.main:app",
+        host="0.0.0.0",
+        port=8000,
+        reload=True,
+        workers=1,
+    )
