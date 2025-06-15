@@ -376,6 +376,11 @@ class AgentController:
         self,
         state: GraphBaseState,
     ) -> GraphBaseState:
+        """
+            @TODO: 가격에 대한 정보가 있을 경우 무한 루프 걸림
+            -> 메뉴만 나열해서 무한 루프 걸리는 것
+        """
+
         parser: PydanticOutputParser = PydanticOutputParser(
             pydantic_object=EvalResponse
         )
@@ -401,6 +406,7 @@ class AgentController:
         # Chain 실행
         chain = prompt | self._base_model | parser
         response: EvalResponse = await chain.ainvoke(input_data)
+
 
         return GraphBaseState(
             question=state["question"],
