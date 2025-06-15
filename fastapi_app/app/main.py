@@ -1,3 +1,4 @@
+import uvicorn
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -41,7 +42,7 @@ async def lifespan(app: FastAPI):
 
     # Startup
     await agent_controller.build_graph()
-    yield
+    yield # 이전의 코드는 app startup 시 실행되는 코드, 이후 코드는 종료시 실행
     # Shutdown
     pass
 
@@ -116,3 +117,6 @@ async def custom_swagger_ui_html():
 @app.get("/")
 async def root():
     return {"message": "AI Chat API에 오신 것을 환영합니다!"}
+
+def start():
+    uvicorn.run(app, host="0.0.0.0", port=8000)
