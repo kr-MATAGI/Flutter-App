@@ -2,7 +2,7 @@ import os
 import io
 import asyncio
 from enum import Enum
-from typing import Optional, Any
+from typing import Optional, Any, Dict
 
 from app.utils.logger import setup_logger
 from app.core.config import settings
@@ -12,9 +12,12 @@ from app.models.graph_state import (
     GraphBaseState,
     AgentResponse,
     EvalResponse,
+    DBResponse,
+    DBResultResponse,
 )
 from app.prompts.prompt_loader import load_prompt
 from app.routers.controller.rag_ctl import RAGController
+from app.routers.controller.db_ctl import DBController
 
 from langchain_openai import ChatOpenAI
 from langchain_core.output_parsers import PydanticOutputParser
@@ -214,6 +217,16 @@ class AgentController:
         # DB 쿼리 노드에서 메인 모델로 돌아가는 엣지
         self._graph.add_edge(GraphNode.DB_QUERY_NODE.value, GraphNode.EVAL_NODE.value)
 
+        # DB 쿼리 노드 결과의 판단을 위해 EVAL NODE로 돌아가는 조건부 엣지
+        self._graph.add_conditional_edges(
+            GraphNode.EVAL_NODE.value,
+            route_by_node,
+            {
+                GraphNode.DB_QUERY_NODE.value: GraphNode.DB_QUERY_NODE.value, # 쿼리 재작성/검색
+                END: END
+            },
+        )
+
 
     async def _main_node(
         self,
@@ -283,40 +296,86 @@ class AgentController:
         self,
         state: GraphBaseState,
     ) -> GraphBaseState:
-        prompt: PromptTemplate = PromptTemplate.from_template(
-            self.MODEL_PROMPTS[GraphNode.DB_QUERY_NODE]
-        )
         parser: PydanticOutputParser = PydanticOutputParser(
-            pydantic_object=AgentResponse
+            pydantic_object=DBResponse
         )
 
+        prompt: PromptTemplate = PromptTemplate(
+            template=self.MODEL_PROMPTS[GraphNode.DB_QUERY_NODE],
+            input_variables=[
+                "question",
+            ],
+            partial_variables={"format": parser.get_format_instructions()},
+        )
+    
         # 입력 데이터 준비
         input_data = {
             "question": state["question"],
-            "history": state["history"],
-            "format": parser.get_format_instructions(),
         }
 
         # Chain 실행
+        # @TODO: 띄워쓰기 처리
         chain = prompt | self._base_model | parser
-        response: AgentResponse = await chain.ainvoke(input_data)
+        response: DBResponse = await chain.ainvoke(input_data)
+
+        if not response.query:
+            raise Exception("No query generated")
+
+        try:
+            db_contoller = DBController()
+            db_resp: Dict[str, Any] = await db_contoller.call_by_agent(
+                response.query
+            )
+
+        except Exception as e:
+            logger.error(f"Error in DB search node: {e}")
+            return GraphBaseState(
+                question=state["question"],
+                next_node=END,
+                answer="죄송합니다. 처리 중 오류가 발생했습니다.",
+                history=state["history"]
+                + [{"role": "system", "content": f"오류 발생: {str(e)}"}],
+            )
+
+        # DB 결과 정리
+        db_res_parser: PydanticOutputParser = PydanticOutputParser(
+            pydantic_object=DBResultResponse
+        )
+
+        db_res_input_data = {
+            "question": state["question"],
+            "db_result": db_resp,
+        }
+        logger.info(f"DB result input data: {db_resp}")
+
+        db_res_prompt: PromptTemplate = PromptTemplate(
+            template=load_prompt("db_result"),
+            input_variables=[
+                "db_result"
+            ],
+            partial_variables={"format": db_res_parser.get_format_instructions()},
+        )
+
+        new_chain = db_res_prompt | self._base_model | db_res_parser
+        db_res_resp: DBResultResponse = await new_chain.ainvoke(db_res_input_data)
 
         return GraphBaseState(
             question=state["question"],
-            next_node=response.next_node,
-            answer=response.answer,
-            confidence_score=0.0,
-            reasoning=response.reasoning,
-            history=state["history"]
-            + [{"role": "assistant", "content": response.answer}],
+            answer=db_res_resp.answer,
+            next_node=GraphNode.EVAL_NODE.value,
+            prev_node=GraphNode.DB_QUERY_NODE.value,
+            confidence_score=db_res_resp.confidence_score,
+            reasoning=db_res_resp.reasoning,
+            history=state["history"] + [{
+                "role": "system", "content": f"DB 쿼리 결과: {db_res_resp.answer}"
+            }],
         )
+
 
     async def _eval_node(
         self,
         state: GraphBaseState,
     ) -> GraphBaseState:
-        logger.info(f"Eval node input state: {state}")
-
         parser: PydanticOutputParser = PydanticOutputParser(
             pydantic_object=EvalResponse
         )
@@ -326,7 +385,7 @@ class AgentController:
                 "question",
                 "prev_answer",
                 "prev_reasoning",
-                "prev_node_selected",
+                "prev_node",
             ],
             partial_variables={"format": parser.get_format_instructions()},
         )
@@ -336,21 +395,18 @@ class AgentController:
             "question": state["question"],
             "prev_answer": state["answer"],
             "prev_reasoning": state["reasoning"],
-            "prev_node_selected": state["next_node"],
+            "prev_node": state["prev_node"],
         }
 
         # Chain 실행
         chain = prompt | self._base_model | parser
         response: EvalResponse = await chain.ainvoke(input_data)
 
-        logger.info(f"Eval node response: {response}")
-
         return GraphBaseState(
             question=state["question"],
             next_node=response.next_node,
             answer=state["answer"],
-            confidence_score=0.0,
-            reasoning=response.quality_score,
+            confidence_score=response.confidence_score,
             feedback=response.feedback,
             history=state["history"] + [{"role": "system", "content": "평가 완료"}],
         )

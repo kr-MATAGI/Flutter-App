@@ -18,6 +18,7 @@ class GraphBaseState(TypedDict):
     next_node: Annotated[Optional[str], "The next node to be executed"]
     prev_node: Annotated[Optional[str], "The previous node to be executed"]
     reasoning: Annotated[Optional[str], "Reason for node selection (0~1)"]
+    query: Annotated[Optional[str], "The query to be executed"]
     feedback: Annotated[Optional[str], "Detailed feedback for improvement"]
     history: Annotated[list[str], "The history of the conversation"]
 
@@ -29,8 +30,19 @@ class AgentResponse(BaseModel):
     reasoning: str = Field(description="Reason for node selection")
 
 
+class DBResponse(BaseModel):
+    query: str = Field(description="The query to be executed")
+    
+
+class DBResultResponse(BaseModel):
+    answer: str = Field(description="The answer to the question")
+    next_node: Optional[str] = Field(description="The next node to be executed")
+    confidence_score: float = Field(description="The confidence score of the answer (0~1)")
+    reasoning: str = Field(description="Reason for node selection")
+
+
 class EvalResponse(BaseModel):
-    quality_score: float = Field(description="The quality score of the answer")
+    confidence_score: float = Field(description="The quality score of the answer (0~1)")
     need_improvement: bool = Field(description="Whether the response needs improvement")
     improvement_areas: list[str] = Field(
         description="Specific areas needing improvement"

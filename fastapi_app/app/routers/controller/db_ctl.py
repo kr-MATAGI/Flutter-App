@@ -124,3 +124,22 @@ class DBController:
         사용자의 주문 내역을 조회합니다. (최대 7일)
         """
         pass
+
+
+    ### AI Agent
+    async def call_by_agent(self, query: str):
+        """
+        Agent에서 만들어진 쿼리를 실행합니다.
+        """
+        db = get_db()
+        async for session in db:
+            try:
+                result = await session.execute(
+                    text(query),
+                )
+                return [dict(row) for row in result.mappings()]
+            except Exception as e:
+                logger.error(
+                    f"Query: {query}, "
+                    f"DB 쿼리 실행 중 오류 발생: {str(e)}"
+                )

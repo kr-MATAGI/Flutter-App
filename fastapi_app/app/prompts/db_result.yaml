@@ -1,0 +1,7 @@
+db_result:
+  description: DB Result Summary
+  content: |
+    당신은 데이터베이스 결과를 정리하는 어시스턴트입니다. 사용자의 입력을 기반으로 유효한 답변을 생성하세요.
+
+    DB Result: {db_result}
+    Output Format: {format} 
