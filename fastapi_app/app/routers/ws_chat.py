@@ -17,6 +17,7 @@ logger = setup_logger("ws_chat")
 CHAT_TOPIC = "chat_messages"
 KAFKA_GROUP_ID = "chat_group"
 
+agent_controller = AgentController()
 
 # 활성 연결을 관리하는 클래스
 class ConnectionManager:
@@ -139,7 +140,7 @@ async def websocket_test_endpoint(websocket: WebSocket):
                         content = message
 
                     # LLM Response 생성
-                    llm_resp = await free_ai_model.ainvoke(content)
+                    llm_resp = await agent_controller.call_agent(content)
 
                     # 응답 생성
                     response = {
